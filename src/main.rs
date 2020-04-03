@@ -70,7 +70,7 @@ fn feldspar_cam() {
     let mut photo_num = 0;
     loop {
         if last_photo.elapsed().unwrap().as_millis() >=40 {  // 25 fps
-            feldspar_camera::take_photo(*camera, format!("feldspar_cam/{}.jpeg", photo_num).as_ref());
+            feldspar_camera::take_photo(camera, format!("feldspar_cam/{}.jpeg", photo_num).as_ref());
         }
     }
 }
