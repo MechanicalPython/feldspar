@@ -56,7 +56,8 @@ fn feldspar_cam() {
             photo_num += 1;
 
             let photo = camera.take_one().unwrap();
-            let photo_path:&str = format!("feldspar_cam/{}.jpeg", photo_num).as_str();
+            let photo_path = format!("feldspar_cam/{}.jpeg", photo_num);
+            let photo_path = photo_path.as_str();
             File::create(photo_path).unwrap().write_all(&photo).unwrap();
         }
     }
