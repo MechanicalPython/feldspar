@@ -32,7 +32,7 @@ mod feldspar_gps {
 
         gps.send_command("PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
         gps.send_command("PMTK220,500");  // 2Hz info rate now.
-        return feldspar_gps;
+        return gps;
     }
 
     pub fn get_new_gps_vals(mut gps: Gps) -> GpsArgValues {
@@ -59,7 +59,7 @@ fn feldspar_gps() {
                                        gps_vals.longitude, gps_vals.fix_quality,
                                        gps_vals.satellites, gps_vals.altitude_m,
                                        gps_vals.speed_knots, gps_vals.horizontal_dilution)
-                .as_bytes())
+                .as_bytes());
         }
     }
 }
