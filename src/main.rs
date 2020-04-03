@@ -31,10 +31,10 @@ fn feldspar_gps() {
             last_gps_reading = SystemTime::now();
 
             gps_file.write_all(format!("{:?},{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
-                                       gps_vals.timestamp, gps_vals.latitude,
-                                       gps_vals.longitude, gps_vals.fix_quality,
-                                       gps_vals.satellites, gps_vals.altitude_m,
-                                       gps_vals.speed_knots, gps_vals.horizontal_dilution)
+                                       gps_values.timestamp, gps_values.latitude,
+                                       gps_values.longitude, gps_values.fix_quality,
+                                       gps_values.satellites, gps_values.altitude_m,
+                                       gps_values.speed_knots, gps_values.horizontal_dilution)
                 .as_bytes());
         }
     }
