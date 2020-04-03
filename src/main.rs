@@ -15,7 +15,7 @@ fn feldspar_gps() {
     gps.send_command("PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
     gps.send_command("PMTK220,500");
 
-    let file = OpenOptions::new().write(true)
+    let _file = OpenOptions::new().write(true)
         .create_new(true)
         .open("gps_data.txt");
 
@@ -53,8 +53,10 @@ fn feldspar_cam() {
     loop {
         if last_photo.elapsed().unwrap().as_millis() >= 40 {  // 25 fps
             last_photo = SystemTime::now();
+            photo_num += 1;
+
             let photo = camera.take_one().unwrap();
-            let photo_path:&str = format!("feldspar_cam/{}.jpeg", photo_num).as_ref();
+            let photo_path:&str = format!("feldspar_cam/{}.jpeg", photo_num).as_str();
             File::create(photo_path).unwrap().write_all(&photo).unwrap();
         }
     }
