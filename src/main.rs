@@ -27,8 +27,8 @@ mod feldspar_camera {
 mod feldspar_gps {
     use adafruit_gps::{Gps, GpsArgValues, open_port};
 
-    pub fn init_gps() -> FeldsparGps {
-        gps = Gps { port: open_port("/dev/serial0") };
+    pub fn init_gps() -> Gps {
+        let mut gps = Gps { port: open_port("/dev/serial0") };
 
         gps.send_command("PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
         gps.send_command("PMTK220,500");  // 2Hz info rate now.
@@ -52,7 +52,7 @@ fn feldspar_gps() {
     loop {
         // GPS
         if last_gps_reading.elapsed().unwrap().as_millis() >= 500 {
-            last_gps = SystemTime::now();
+            last_gps_reading = SystemTime::now();
             let gps_vals = feldspar_gps::get_new_gps_vals(gps);
             gps_file.write_all(format!("{:?},{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
                                        gps_vals.timestamp, gps_vals.latitude,
