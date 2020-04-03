@@ -1,8 +1,7 @@
-use std::{thread, time};
+use std::thread;
 use std::fs::OpenOptions;
 use std::io::Write;
-use std::time::{Duration, SystemTime};
-use crate::feldspar_camera::take_photo;
+use std::time::{SystemTime};
 
 mod feldspar_camera {
     use std::fs::File;
@@ -55,7 +54,7 @@ fn feldspar_gps() {
         if last_gps_reading.elapsed().unwrap().as_millis() >= 500 {
             last_gps = SystemTime::now();
             let gps_vals = feldspar_gps::get_new_gps_vals(gps);
-            gps_file.write_all(format!("{},{},{},{},{},{},{},{}\n",
+            gps_file.write_all(format!("{:?},{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
                                        gps_vals.timestamp, gps_vals.latitude,
                                        gps_vals.longitude, gps_vals.fix_quality,
                                        gps_vals.satellites, gps_vals.altitude_m,
@@ -71,7 +70,7 @@ fn feldspar_cam() {
     let mut photo_num = 0;
     loop {
         if last_photo.elapsed().unwrap().as_millis() >=40 {  // 25 fps
-            feldspar_camera::take_photo(*camera, format!("feldspar_cam/{}.jpeg", photo_num));
+            feldspar_camera::take_photo(*camera, format!("feldspar_cam/{}.jpeg", photo_num).as_ref());
         }
     }
 }
