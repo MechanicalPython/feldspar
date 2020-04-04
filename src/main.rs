@@ -64,6 +64,10 @@ fn feldspar_cam() {
 }
 
 fn main() {
+    println!("Main nondebug");
+
+    #[cfg(feature="debug")]
+    println!("Debug main");
     thread::spawn(|| {
         #[cfg(feature="debug")]
         println!("Spawn gps");
