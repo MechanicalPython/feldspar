@@ -28,7 +28,7 @@ fn feldspar_gps() {
             gps_values = gps.update(gps_values);
             last_gps_reading = SystemTime::now();
 
-            if gps_values.fix_quality == 0 {
+            if gps_values.fix_quality != Some(1) {
                 gps_file.write_all(format!("{:?} -- No fix\n", gps_values.timestamp).as_bytes()
                 ).expect("Failed to write file");
             } else {
