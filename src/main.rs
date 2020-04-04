@@ -68,10 +68,11 @@ fn feldspar_cam() {
 
 
 fn main() {
-    thread::spawn(|| {
-        dbg!("Spawn gps");
-        feldspar_gps()
-    });
-    dbg!("Spawn cam");
-    feldspar_cam();
+    feldspar_gps();
+    // thread::spawn(|| {
+    //     dbg!("Spawn gps");
+    //     feldspar_gps()
+    // });
+    // // dbg!("Spawn cam");
+    // // feldspar_cam();
 }
