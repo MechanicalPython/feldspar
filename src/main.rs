@@ -1,12 +1,11 @@
+use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Write;
-use std::fs::File;
 use std::thread;
 use std::time::{Duration, SystemTime};
 
 use adafruit_gps::{Gps, GpsArgValues, open_port};
 use rascam::SimpleCamera;
-
 
 fn feldspar_gps() {
     let mut gps = Gps { port: open_port("/dev/serial0") };
@@ -27,15 +26,19 @@ fn feldspar_gps() {
     loop {
         if last_gps_reading.elapsed().unwrap().as_millis() >= 500 {
             gps_values = gps.update(gps_values);
-
             last_gps_reading = SystemTime::now();
 
-            gps_file.write_all(format!("{:?},{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
-                                       gps_values.timestamp, gps_values.latitude,
-                                       gps_values.longitude, gps_values.fix_quality,
-                                       gps_values.satellites, gps_values.altitude_m,
-                                       gps_values.speed_knots, gps_values.horizontal_dilution)
-                .as_bytes()).expect("Failed to write");
+            if gps_values.fix_quality == 0 {
+                gps_file.write_all(format!("{:?} -- No fix\n", gps_values.timestamp).as_bytes()
+                ).expect("Failed to write file");
+            } else {
+                gps_file.write_all(format!("{:?},{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
+                                           gps_values.timestamp, gps_values.latitude,
+                                           gps_values.longitude, gps_values.fix_quality,
+                                           gps_values.satellites, gps_values.altitude_m,
+                                           gps_values.speed_knots, gps_values.horizontal_dilution)
+                    .as_bytes()).expect("Failed to write");
+            }
         }
     }
 }
