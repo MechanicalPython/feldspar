@@ -35,10 +35,10 @@ fn feldspar_gps() {
             } else {
                 gps_file.write_all(
                     format!("{:?},{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
-                            (gps_values.timestamp, gps_values.latitude,
+                            gps_values.timestamp, gps_values.latitude,
                              gps_values.longitude, gps_values.fix_quality,
                              gps_values.satellites, gps_values.altitude_m,
-                             gps_values.speed_knots, gps_values.horizontal_dilution))
+                             gps_values.speed_knots, gps_values.horizontal_dilution)
                         .as_bytes()).expect("Failed to write line");
             }
         }
@@ -51,6 +51,7 @@ fn feldspar_cam() {
 
 
 fn main() {
+    format!("{}", )
     feldspar_gps();
     // thread::spawn(|| {
     //     dbg!("Spawn gps");
