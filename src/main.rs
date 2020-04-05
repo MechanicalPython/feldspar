@@ -1,12 +1,10 @@
-use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::process::Command;
 use std::thread;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 use adafruit_gps::{Gps, GpsArgValues, open_port};
-use rascam::SimpleCamera;
 
 fn feldspar_gps() {
     let mut gps = Gps { port: open_port("/dev/serial0") };
