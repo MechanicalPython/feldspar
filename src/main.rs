@@ -1,9 +1,9 @@
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Write;
+use std::process::Command;
 use std::thread;
 use std::time::{Duration, SystemTime};
-use std::process::Command;
 
 use adafruit_gps::{Gps, GpsArgValues, open_port};
 use rascam::SimpleCamera;
@@ -34,10 +34,39 @@ fn feldspar_gps() {
                 ).expect("Failed to write file");
             } else {
                 gps_file.write_all(format!("{:?},{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
-                                           gps_values.timestamp, gps_values.latitude,
-                                           gps_values.longitude, gps_values.fix_quality,
-                                           gps_values.satellites, gps_values.altitude_m,
-                                           gps_values.speed_knots, gps_values.horizontal_dilution)
+                                           (match gps_values.timestamp {
+                                               Some(val) => val,
+                                               None => "None",
+                                           }),
+                                           (match gps_values.latitude {
+                                               Some(val) => val,
+                                               None => "None",
+                                           }),
+                                           (match gps_values.longitude {
+                                               Some(val) => val,
+                                               None => "None",
+                                           }),
+                                           (match gps_values.fix_quality {
+                                               Some(val) => val,
+                                               None => "None",
+                                           }),
+                                           (match gps_values.satellites {
+                                               Some(val) => val,
+                                               None => "None",
+                                           }),
+                                           (match gps_values.altitude_m {
+                                               Some(val) => val,
+                                               None => "None",
+                                           }),
+                                           (match gps_values.speed_knots {
+                                               Some(val) => val,
+                                               None => "None",
+                                           }),
+                                           (match gps_values.horizontal_dilution {
+                                               Some(val) => val,
+                                               None => "None",
+                                           }),
+                )
                     .as_bytes()).expect("Failed to write");
             }
         }
@@ -45,7 +74,7 @@ fn feldspar_gps() {
 }
 
 fn feldspar_cam() {
-    Command::new("raspivid").arg("-o").arg("~/video.h264").output().expect("Failed to execute");
+    Command::new("raspivid").arg("-o").arg("video.h264").output().expect("Failed to execute");
 }
 
 
