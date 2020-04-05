@@ -51,7 +51,6 @@ fn feldspar_cam() {
 
 
 fn main() {
-    format!("{}", )
     feldspar_gps();
     // thread::spawn(|| {
     //     dbg!("Spawn gps");
