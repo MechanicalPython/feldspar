@@ -50,11 +50,10 @@ fn feldspar_cam() {
 
 
 fn main() {
-    feldspar_gps();
-    // thread::spawn(|| {
-    //     dbg!("Spawn gps");
-    //     feldspar_gps()
-    // });
-    // // dbg!("Spawn cam");
-    // // feldspar_cam();
+    thread::spawn(|| {
+        dbg!("Spawn gps");
+        feldspar_gps()
+    });
+    dbg!("Spawn cam");
+    feldspar_cam();
 }
