@@ -33,41 +33,13 @@ fn feldspar_gps() {
                 gps_file.write_all(format!("{:?} -- No fix\n", gps_values.timestamp).as_bytes()
                 ).expect("Failed to write file");
             } else {
-                gps_file.write_all(format!("{:?},{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
-                                           (match gps_values.timestamp {
-                                               Some(val) => val,
-                                               None => "None",
-                                           }),
-                                           (match gps_values.latitude {
-                                               Some(val) => val,
-                                               None => "None",
-                                           }),
-                                           (match gps_values.longitude {
-                                               Some(val) => val,
-                                               None => "None",
-                                           }),
-                                           (match gps_values.fix_quality {
-                                               Some(val) => val,
-                                               None => "None",
-                                           }),
-                                           (match gps_values.satellites {
-                                               Some(val) => val,
-                                               None => "None",
-                                           }),
-                                           (match gps_values.altitude_m {
-                                               Some(val) => val,
-                                               None => "None",
-                                           }),
-                                           (match gps_values.speed_knots {
-                                               Some(val) => val,
-                                               None => "None",
-                                           }),
-                                           (match gps_values.horizontal_dilution {
-                                               Some(val) => val,
-                                               None => "None",
-                                           }),
-                )
-                    .as_bytes()).expect("Failed to write");
+                gps_file.write_all(
+                    format!("{:?},{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
+                            (gps_values.timestamp, gps_values.latitude,
+                             gps_values.longitude, gps_values.fix_quality,
+                             gps_values.satellites, gps_values.altitude_m,
+                             gps_values.speed_knots, gps_values.horizontal_dilution))
+                        .as_bytes()).expect("Failed to write line");
             }
         }
     }

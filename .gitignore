@@ -1,3 +1,5 @@
 /target
 **/*.rs.bk
 .idea
+feldspar_cam/
+gps_data.txt
