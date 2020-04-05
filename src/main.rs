@@ -3,6 +3,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::thread;
 use std::time::{Duration, SystemTime};
+use std::process::Command;
 
 use adafruit_gps::{Gps, GpsArgValues, open_port};
 use rascam::SimpleCamera;
@@ -44,26 +45,7 @@ fn feldspar_gps() {
 }
 
 fn feldspar_cam() {
-    let info = rascam::info().unwrap();
-    let mut camera = SimpleCamera::new(info.cameras[0].clone()).unwrap();
-    camera.activate().unwrap();
-
-    let sleep_duration = Duration::from_millis(2000);
-    thread::sleep(sleep_duration);
-
-    let mut last_photo = SystemTime::now();
-    let mut photo_num = 0;
-    loop {
-        if last_photo.elapsed().unwrap().as_millis() >= 40 {  // 25 fps
-            last_photo = SystemTime::now();
-            photo_num += 1;
-
-            let photo = camera.take_one().unwrap();
-            let photo_path = format!("feldspar_cam/{}.jpeg", photo_num);
-            let photo_path = photo_path.as_str();
-            File::create(photo_path).unwrap().write_all(&photo).unwrap();
-        }
-    }
+    Command::new("raspivid").arg("-o").arg("~/video.h264").output().expect("Failed to execute");
 }
 
 
