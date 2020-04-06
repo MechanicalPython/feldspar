@@ -45,7 +45,8 @@ fn feldspar_gps() {
 }
 
 fn feldspar_cam() {
-    let c = Command::new("raspivid").arg("-o").arg("video.h264").arg("-t").arg("6000").output().expect("Camera failed");
+    let c = Command::new("raspivid").arg("-o").arg("video.h264").arg("-t").arg("300000").output().expect("Camera failed");
+    // 1000 = 1 second. 300000 is 5 mins.
     dbg!(c);
 }
 
@@ -56,5 +57,5 @@ fn main() {
         feldspar_gps()
     });
     dbg!("Spawn cam");
-    feldspar_cam();
+    feldspar_cam();  // When this command is done, the main() closes so the gps stops.
 }
