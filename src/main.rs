@@ -26,7 +26,7 @@ fn feldspar_gps() {
         if last_gps_reading.elapsed().unwrap().as_millis() >= 500 {
             gps_values = gps.update(gps_values);
             last_gps_reading = SystemTime::now();
-
+            // println!("{:?}", gps_values);
             if gps_values.fix_quality != Some(1) {
                 gps_file.write_all(format!("{:?} -- No fix\n", gps_values.timestamp).as_bytes()
                 ).expect("Failed to write file");
@@ -39,12 +39,13 @@ fn feldspar_gps() {
                              gps_values.horizontal_dilution)
                         .as_bytes()).expect("Failed to write line");
             }
+
         }
     }
 }
 
 fn feldspar_cam() {
-    Command::new("raspivid").arg("-t").arg("6000").arg("-o").arg("video.h264").output().expect("Failed to execute");
+    Command::new("raspivid").arg("-o").arg("video.h264").arg("-t").arg("6000").output();
 }
 
 
