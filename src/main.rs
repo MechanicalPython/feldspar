@@ -44,7 +44,7 @@ fn feldspar_gps() {
 }
 
 fn feldspar_cam() {
-    Command::new("raspivid").arg("-o").arg("video.h264").output().expect("Failed to execute");
+    Command::new("raspivid").arg("-o").arg("video.h264").arg("-t").arg(100*60).output().expect("Failed to execute");
 }
 
 
