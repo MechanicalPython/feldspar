@@ -45,21 +45,22 @@ fn main() {
     println!("Press enter to begin launch countdown.");
 
     thread::spawn(|| {
-        dbg!("Spawn gps");
+        println!("Initialising gps...");
         feldspar_gps()
     });
     thread::spawn(|| {
-        dbg!("Spawn cam");
+        println!("Initialising camera...");
         feldspar_cam(100);
     });
 
     let mut s = String::new();
     let _stdin = io::stdin().read_line(&mut s).unwrap();
-    for i in (0..10).rev(){
+    for i in (1..11).rev(){
         println!("{}", i);
         thread::sleep(Duration::from_secs(1));
     }
-    println!("Launch!")
+    println!("Launch!");
+    thread::sleep(Duration::from_secs(100));
 
 }
 
