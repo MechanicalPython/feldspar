@@ -46,7 +46,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let launch_duration: &str = args.get(1).expect("Please enter an instrument recording time (seconds)");
-    let launch_duration = launch_duration.parse::<u32>().expect("Please enter a valid integer for launch duration");
+    let launch_duration = launch_duration.parse::<u64>().expect("Please enter a valid integer for launch duration");
     let feldspar_number = args.get(2).expect("Please enter feldspar launch number.");
 
     let vid_name = format!("./feldspar{}_vid.h264", feldspar_number);
@@ -66,12 +66,12 @@ fn main() {
 
     let gps_thread = thread::spawn(move|| {
         println!("Starting gps...");
-        feldspar_gps(100, gps_file_name.as_str())
+        feldspar_gps(launch_duration, gps_file_name.as_str())
     });
 
     let cam_thread = thread::spawn(move|| {
         println!("Starting camera...");
-        feldspar_cam(100, vid_name.as_str());
+        feldspar_cam(launch_duration, vid_name.as_str());
     });
 
     for i in (1..11).rev() {
