@@ -66,12 +66,12 @@ fn main() {
 
     let gps_thread = thread::spawn(move|| {
         println!("Starting gps...");
-        feldspar_gps(launch_duration, gps_file_name.as_str())
+        feldspar_gps(launch_duration + 10, gps_file_name.as_str())
     });
 
     let cam_thread = thread::spawn(move|| {
         println!("Starting camera...");
-        feldspar_cam(launch_duration, vid_name.as_str());
+        feldspar_cam(launch_duration + 10, vid_name.as_str());
     });
 
     for i in (1..11).rev() {
