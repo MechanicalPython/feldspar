@@ -9,6 +9,8 @@ use std::time::{Duration, SystemTime};
 use adafruit_gps::gps::{GetGpsData, Gps, open_port};
 use adafruit_gps::PMTK::send_pmtk::SendPmtk;
 
+use rppal::gpio::Gpio;
+
 fn feldspar_gps(capture_duration: u64, file_name: &str) {
 
     let port = open_port("/dev/serial0");
@@ -39,6 +41,14 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) {
 fn feldspar_cam(seconds: u64, vid_file: &str) {
     let mili = Duration::from_secs(seconds).as_millis().to_string();
     let _c = Command::new("raspivid").arg("-o").arg(vid_file).arg("-t").arg(mili.as_str()).output().expect("Camera failed to open.");
+}
+
+
+fn feldspar_parachute(seconds_to_wait: u64) {
+    let pin_num = 23;  // BCM pin 23 is physical pin 16
+    let mut pin = Gpio::new().unwrap().get(pin_num).unwrap().into_input();
+    thread::sleep(Duration::from_secs(seconds_to_wait));
+    pin.set_high();
 }
 
 
@@ -82,6 +92,7 @@ fn main() {
     for i in (0..launch_duration - 10).rev() {
         println!("{}", i);
     }
+    feldspar_parachute(7);
 
     cam_thread.join().unwrap();
     gps_thread.join().unwrap();
