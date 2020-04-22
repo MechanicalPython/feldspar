@@ -5,6 +5,7 @@ use std::path::Path;
 use std::process::Command;
 use std::thread;
 use std::time::{Duration, SystemTime};
+use std::error::Error;
 
 use adafruit_gps::gps::{GetGpsData, Gps, open_port};
 use adafruit_gps::PMTK::send_pmtk::SendPmtk;
@@ -58,20 +59,20 @@ fn feldspar_cam(seconds: u64, vid_file: &str) {
         .expect("Camera failed to open.");
 }
 
-fn feldspar_parachute(_seconds_to_wait: u64) {
+fn feldspar_parachute(_seconds_to_wait: u64) -> Result<(), Box<dyn Error>> {
     const PERIOD_MS: u64 = 20;
     const PULSE_MIN_US: u64 = 1200;
     const PULSE_NEUTRAL_US: u64 = 1500;
     const PULSE_MAX_US: u64 = 1800;
     let pin_num = 23; // BCM pin 23 is physical pin 16
-    let mut pin = Gpio::new()?.get(pin_num)?.into_output();
+    let mut pin = Gpio::new()?.get(GPIO_PWM)?.into_output();
 
     // Enable software-based PWM with the specified period, and rotate the servo by
     // setting the pulse width to its maximum value.
     pin.set_pwm(
         Duration::from_millis(PERIOD_MS),
         Duration::from_micros(PULSE_MAX_US),
-    ).unwrap();
+    )?;
 
     // Sleep for 500 ms while the servo moves into position.
     thread::sleep(Duration::from_millis(500));
@@ -80,7 +81,7 @@ fn feldspar_parachute(_seconds_to_wait: u64) {
     pin.set_pwm(
         Duration::from_millis(PERIOD_MS),
         Duration::from_micros(PULSE_MIN_US),
-    ).unwrap();
+    )?;
 
     thread::sleep(Duration::from_millis(500));
 
@@ -89,9 +90,10 @@ fn feldspar_parachute(_seconds_to_wait: u64) {
         pin.set_pwm(
             Duration::from_millis(PERIOD_MS),
             Duration::from_micros(pulse),
-        ).unwrap();
+        )?;
         thread::sleep(Duration::from_millis(20));
     }
+    Ok(())
 
 }
 
