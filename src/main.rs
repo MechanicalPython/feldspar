@@ -71,7 +71,7 @@ fn feldspar_parachute(_seconds_to_wait: u64) -> Result<(), Box<dyn Error>> {
     // setting the pulse width to its maximum value.
     pin.set_pwm(
         Duration::from_millis(PERIOD_MS),
-        Duration::from_micros(PULSE_MAX_US),
+        Duration::from_micros(PULSE_MAX_US*2),
     )?;
 
     // Sleep for 500 ms while the servo moves into position.
