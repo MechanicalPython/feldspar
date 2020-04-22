@@ -59,15 +59,22 @@ fn feldspar_cam(seconds: u64, vid_file: &str) {
         .expect("Camera failed to open.");
 }
 
-fn feldspar_parachute(seconds_to_wait: u64) {
-    // let pin_num = 23; // BCM pin 23 is physical pin 16
-    // let pwn = Pwm::with_period(
-    //     Channel::Pwm0,
-    //     Duration::from_millis(20),
-    //     Duration::from_millis(1800),
-    //     Polarity::Normal,
-    //     true,
-    // )?;
+fn feldspar_parachute(_seconds_to_wait: u64) {
+    let pin_num = 23; // BCM pin 23 is physical pin 16
+    let pwn = Pwm::with_period(
+        Channel::Pwm0,
+        Duration::from_millis(20),
+        Duration::from_millis(1800),
+        Polarity::Normal,
+        true,
+    )?;
+    // Sleep for 500 ms while the servo moves into position.
+    thread::sleep(Duration::from_millis(500));
+
+    // Rotate the servo to the opposite side.
+    pwm.set_pulse_width(Duration::from_micros(PULSE_MIN_US))?;
+
+    thread::sleep(Duration::from_millis(500));
 
 }
 
