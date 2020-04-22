@@ -85,6 +85,13 @@ fn feldspar_parachute(_seconds_to_wait: u64) -> Result<(), Box<dyn Error>> {
 
     thread::sleep(Duration::from_millis(1000));
 
+    pin.set_pwm(
+        Duration::from_millis(PERIOD_MS),
+        Duration::from_micros(PULSE_NEUTRAL_US),
+    )?;
+
+    thread::sleep(Duration::from_millis(1000));
+
     // Rotate the servo to its neutral (center) position in small steps.
     // for pulse in (PULSE_MIN_US..=PULSE_NEUTRAL_US).step_by(10) {
     //     pin.set_pwm(
