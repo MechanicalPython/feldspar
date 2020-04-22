@@ -75,24 +75,24 @@ fn feldspar_parachute(_seconds_to_wait: u64) -> Result<(), Box<dyn Error>> {
     )?;
 
     // Sleep for 500 ms while the servo moves into position.
-    thread::sleep(Duration::from_millis(500));
-
-    // Rotate the servo to the opposite side.
-    pin.set_pwm(
-        Duration::from_millis(PERIOD_MS),
-        Duration::from_micros(PULSE_MIN_US),
-    )?;
-
-    thread::sleep(Duration::from_millis(500));
-
-    // Rotate the servo to its neutral (center) position in small steps.
-    for pulse in (PULSE_MIN_US..=PULSE_NEUTRAL_US).step_by(10) {
-        pin.set_pwm(
-            Duration::from_millis(PERIOD_MS),
-            Duration::from_micros(pulse),
-        )?;
-        thread::sleep(Duration::from_millis(20));
-    }
+    // thread::sleep(Duration::from_millis(500));
+    //
+    // // Rotate the servo to the opposite side.
+    // pin.set_pwm(
+    //     Duration::from_millis(PERIOD_MS),
+    //     Duration::from_micros(PULSE_MIN_US),
+    // )?;
+    //
+    // thread::sleep(Duration::from_millis(500));
+    //
+    // // Rotate the servo to its neutral (center) position in small steps.
+    // for pulse in (PULSE_MIN_US..=PULSE_NEUTRAL_US).step_by(10) {
+    //     pin.set_pwm(
+    //         Duration::from_millis(PERIOD_MS),
+    //         Duration::from_micros(pulse),
+    //     )?;
+    //     thread::sleep(Duration::from_millis(20));
+    // }
     Ok(())
 
 }
