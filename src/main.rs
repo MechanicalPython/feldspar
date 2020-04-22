@@ -6,10 +6,9 @@ use std::process::Command;
 use std::thread;
 use std::time::{Duration, SystemTime};
 
-use adafruit_gps::gps::{open_port, GetGpsData, Gps};
+use adafruit_gps::gps::{GetGpsData, Gps, open_port};
 use adafruit_gps::PMTK::send_pmtk::SendPmtk;
-
-use rppal::pwm::{Channel, Polarity, Pwm};
+use rppal::gpio::Gpio;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) {
     let port = open_port("/dev/serial0");
@@ -42,7 +41,7 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) {
                     gps_values.geoidal_spe,
                     gps_values.altitude
                 )
-                .as_bytes(),
+                    .as_bytes(),
             )
             .expect("Failed to write line");
     }
@@ -60,21 +59,39 @@ fn feldspar_cam(seconds: u64, vid_file: &str) {
 }
 
 fn feldspar_parachute(_seconds_to_wait: u64) {
+    const PERIOD_MS: u64 = 20;
+    const PULSE_MIN_US: u64 = 1200;
+    const PULSE_NEUTRAL_US: u64 = 1500;
+    const PULSE_MAX_US: u64 = 1800;
     let pin_num = 23; // BCM pin 23 is physical pin 16
-    let pwn = Pwm::with_period(
-        Channel::Pwm0,
-        Duration::from_millis(20),
-        Duration::from_millis(1800),
-        Polarity::Normal,
-        true,
+    let mut pin = Gpio::new()?.get(GPIO_PWM)?.into_output();
+
+    // Enable software-based PWM with the specified period, and rotate the servo by
+    // setting the pulse width to its maximum value.
+    pin.set_pwm(
+        Duration::from_millis(PERIOD_MS),
+        Duration::from_micros(PULSE_MAX_US),
     )?;
+
     // Sleep for 500 ms while the servo moves into position.
     thread::sleep(Duration::from_millis(500));
 
     // Rotate the servo to the opposite side.
-    pwm.set_pulse_width(Duration::from_micros(1200))?;
+    pin.set_pwm(
+        Duration::from_millis(PERIOD_MS),
+        Duration::from_micros(PULSE_MIN_US),
+    )?;
 
     thread::sleep(Duration::from_millis(500));
+
+    // Rotate the servo to its neutral (center) position in small steps.
+    for pulse in (PULSE_MIN_US..=PULSE_NEUTRAL_US).step_by(10) {
+        pin.set_pwm(
+            Duration::from_millis(PERIOD_MS),
+            Duration::from_micros(pulse),
+        )?;
+        thread::sleep(Duration::from_millis(20));
+    }
 
 }
 
