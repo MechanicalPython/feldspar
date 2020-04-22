@@ -64,7 +64,7 @@ fn feldspar_parachute(_seconds_to_wait: u64) {
     const PULSE_NEUTRAL_US: u64 = 1500;
     const PULSE_MAX_US: u64 = 1800;
     let pin_num = 23; // BCM pin 23 is physical pin 16
-    let mut pin = Gpio::new()?.get(GPIO_PWM)?.into_output();
+    let mut pin = Gpio::new()?.get(pin_num)?.into_output();
 
     // Enable software-based PWM with the specified period, and rotate the servo by
     // setting the pulse width to its maximum value.
