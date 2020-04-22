@@ -1,11 +1,11 @@
 use std::env;
+use std::error::Error;
 use std::fs::OpenOptions;
 use std::io::{self, Write};
 use std::path::Path;
 use std::process::Command;
 use std::thread;
 use std::time::{Duration, SystemTime};
-use std::error::Error;
 
 use adafruit_gps::gps::{GetGpsData, Gps, open_port};
 use adafruit_gps::PMTK::send_pmtk::SendPmtk;
@@ -59,7 +59,7 @@ fn feldspar_cam(seconds: u64, vid_file: &str) {
         .expect("Camera failed to open.");
 }
 
-fn feldspar_parachute(_seconds_to_wait: u64) -> Result<(), Box<dyn Error>> {
+fn feldspar_parachute(_seconds_to_wait: u64, cmds: Vec<u64>) -> Result<(), Box<dyn Error>> {
     const PERIOD_MS: u64 = 20;
     const PULSE_MIN_US: u64 = 1200;
     const PULSE_NEUTRAL_US: u64 = 1500;
@@ -69,43 +69,21 @@ fn feldspar_parachute(_seconds_to_wait: u64) -> Result<(), Box<dyn Error>> {
 
     // Enable software-based PWM with the specified period, and rotate the servo by
     // setting the pulse width to its maximum value.
-    pin.set_pwm(
-        Duration::from_millis(PERIOD_MS),
-        Duration::from_micros(PULSE_MAX_US*2),
-    )?;
+    for cmd in cmds {
+        pin.set_pwm(
+            Duration::from_millis(PERIOD_MS),
+            Duration::from_micros(cmd),
+        )?;
 
-    // Sleep for 500 ms while the servo moves into position.
-    thread::sleep(Duration::from_millis(1000));
+        // Sleep for 500 ms while the servo moves into position.
+        thread::sleep(Duration::from_millis(1000));
+    }
 
-    // Rotate the servo to the opposite side.
-    pin.set_pwm(
-        Duration::from_millis(PERIOD_MS),
-        Duration::from_micros(PULSE_MIN_US),
-    )?;
-
-    thread::sleep(Duration::from_millis(1000));
-
-    pin.set_pwm(
-        Duration::from_millis(PERIOD_MS),
-        Duration::from_micros(PULSE_NEUTRAL_US),
-    )?;
-
-    thread::sleep(Duration::from_millis(1000));
-
-    // Rotate the servo to its neutral (center) position in small steps.
-    // for pulse in (PULSE_MIN_US..=PULSE_NEUTRAL_US).step_by(10) {
-    //     pin.set_pwm(
-    //         Duration::from_millis(PERIOD_MS),
-    //         Duration::from_micros(pulse),
-    //     )?;
-    //     thread::sleep(Duration::from_millis(20));
-    // }
     Ok(())
-
 }
 
 fn main() {
-    // let args: Vec<String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
     //
     // let launch_duration: &str = args
     //     .get(1)
@@ -148,7 +126,11 @@ fn main() {
     // for i in (0..launch_duration - 10).rev() {
     //     println!("{}", i);
     // }
-    feldspar_parachute(7);
+    let mut parachute_args = Vec::new();
+    for a in args.iter() {
+        parachute_args.push(a.parse::<u64>().unwrap())
+    }
+    feldspar_parachute(7, parachute_args);
 
     // cam_thread.join().unwrap();
     // gps_thread.join().unwrap();
