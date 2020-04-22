@@ -83,7 +83,7 @@ fn feldspar_parachute(_seconds_to_wait: u64, cmds: Vec<u64>) -> Result<(), Box<d
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let mut args: Vec<String> = env::args().collect();
     //
     // let launch_duration: &str = args
     //     .get(1)
@@ -126,6 +126,7 @@ fn main() {
     // for i in (0..launch_duration - 10).rev() {
     //     println!("{}", i);
     // }
+    args.remove(0);
     let mut parachute_args = Vec::new();
     for a in args.iter() {
         parachute_args.push(a.parse::<u64>().unwrap())
