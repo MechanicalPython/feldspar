@@ -89,7 +89,7 @@ fn feldspar_parachute(_seconds_to_wait: u64) {
         pin.set_pwm(
             Duration::from_millis(PERIOD_MS),
             Duration::from_micros(pulse),
-        )?;
+        ).unwrap();
         thread::sleep(Duration::from_millis(20));
     }
 
