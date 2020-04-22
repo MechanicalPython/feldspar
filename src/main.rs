@@ -72,7 +72,7 @@ fn feldspar_parachute(_seconds_to_wait: u64) {
     thread::sleep(Duration::from_millis(500));
 
     // Rotate the servo to the opposite side.
-    pwm.set_pulse_width(Duration::from_micros(PULSE_MIN_US))?;
+    pwm.set_pulse_width(Duration::from_micros(1200))?;
 
     thread::sleep(Duration::from_millis(500));
 
