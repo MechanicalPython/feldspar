@@ -134,12 +134,10 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
     println!("Launch!");
-    // for i in (0..launch_duration - 10).rev() {
-    //     println!("{}", i);
-    // }
 
-    for i in 0..- 7 {
-        println!("{}", i);
+    for i in 0..7 {
+        println!("-{}", i);
+        thread::sleep(Duration::from_secs(1));
     }
     println!("Deploy!");
     feldspar_parachute(0, vec![[2500, 1000], [500, 500]]);
