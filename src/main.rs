@@ -134,12 +134,15 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
     println!("Launch!");
-    for i in (0..launch_duration - 10).rev() {
+    // for i in (0..launch_duration - 10).rev() {
+    //     println!("{}", i);
+    // }
+
+    for i in 0..- 7 {
         println!("{}", i);
     }
-
-    feldspar_parachute(7, vec![[2500, 500], [500, 500]]);
     println!("Deploy!");
+    feldspar_parachute(0, vec![[2500, 1000], [500, 500]]);
 
     cam_thread.join().unwrap();
     gps_thread.join().unwrap();
