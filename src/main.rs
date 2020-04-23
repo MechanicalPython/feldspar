@@ -115,7 +115,7 @@ fn main() {
     println!("Instrument recording time is {}", launch_duration);
 
     println!("Init servo");
-    feldspar_parachute(0, vec![[500, 0]]);
+    feldspar_parachute(0, vec![[500, 500]]);
     println!("Press enter to begin launch countdown.");
     let mut s = String::new();
     let _stdin = io::stdin().read_line(&mut s).unwrap();
@@ -139,7 +139,7 @@ fn main() {
         println!("{}", i);
     }
 
-    feldspar_parachute(7, vec![[2500, 0]]);
+    feldspar_parachute(7, vec![[2500, 500]]);
     println!("Deploy!");
 
     cam_thread.join().unwrap();
