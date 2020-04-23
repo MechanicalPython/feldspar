@@ -1,5 +1,4 @@
 use std::env;
-use std::error::Error;
 use std::fs::OpenOptions;
 use std::io::{self, Write};
 use std::path::Path;
@@ -84,6 +83,7 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
     for cmd_pair in cmds {
         let cmd = cmd_pair[0];
         let wait = cmd_pair[1];
+        dbg!(&cmd, &wait);
         pin.set_pwm(
             Duration::from_millis(PERIOD_MS),
             Duration::from_micros(cmd),  // 1000 micros = 1 milli.
@@ -94,7 +94,7 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
 }
 
 fn main() {
-    let mut args: Vec<String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
 
     let launch_duration: &str = args
         .get(1)
