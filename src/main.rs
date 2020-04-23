@@ -1,69 +1,26 @@
 use std::env;
 use std::error::Error;
-use std::fs::OpenOptions;
-use std::io::{self, Write};
-use std::path::Path;
-use std::process::Command;
 use std::thread;
-use std::time::{Duration, SystemTime};
+use std::time::{Duration};
 
-use adafruit_gps::gps::{GetGpsData, Gps, open_port};
-use adafruit_gps::PMTK::send_pmtk::SendPmtk;
 use rppal::gpio::Gpio;
 
-fn feldspar_gps(capture_duration: u64, file_name: &str) {
-    let port = open_port("/dev/serial0");
-    let mut gps = Gps { port };
-
-    gps.pmtk_314_api_set_nmea_output(0, 0, 1, 1, 1, 1, 1);
-    let pmtk001 = gps.pmtk_220_set_nmea_updaterate("600");
-    dbg!(pmtk001);
-    let _file = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(file_name);
-
-    let mut gps_file = OpenOptions::new()
-        .append(true)
-        .open(file_name) // fails if no file.
-        .expect("cannot open file");
-    let start_time = SystemTime::now();
-    while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
-        let gps_values = gps.update();
-
-        gps_file
-            .write_all(
-                format!(
-                    "{:?},{:?},{:?},{:?},{:?},{:?}\n",
-                    gps_values.utc,
-                    gps_values.latitude,
-                    gps_values.longitude,
-                    gps_values.speed_kph,
-                    gps_values.geoidal_spe,
-                    gps_values.altitude
-                )
-                    .as_bytes(),
-            )
-            .expect("Failed to write line");
-    }
-}
-
-fn feldspar_cam(seconds: u64, vid_file: &str) {
-    let mili = Duration::from_secs(seconds).as_millis().to_string();
-    let _c = Command::new("raspivid")
-        .arg("-o")
-        .arg(vid_file)
-        .arg("-t")
-        .arg(mili.as_str())
-        .output()
-        .expect("Camera failed to open.");
-}
-
+/// Servo motor has a period of 50Hz (20ms).
+/// The position is tied to the pulse width. So a 1.5ms pulse over a 20ms duration is position 0.
+/// Opposite the wire input is the 'top' of the servo: 0 degrees.
+/// 1500 is position 0. Lower numbers go right. Higher numbers go left.
+/// 2500 is -90, 500 is +90. Can be pushed to 2700 and 200.
+///
+///
+/// less than 200 = 1.5 rotations clockwise.
+/// Over 3000 = 1.5 (and a bit) rotations anti-clockwise.
+/// 6000 - 8000 = 6 oclock shuffle: as a clock, the arm goes 5 - 7 three times.
+/// 10000 = 1.5 rotations clockwise
 fn feldspar_parachute(_seconds_to_wait: u64, cmds: Vec<u64>) -> Result<(), Box<dyn Error>> {
     const PERIOD_MS: u64 = 20;
-    const PULSE_MIN_US: u64 = 1200;
-    const PULSE_NEUTRAL_US: u64 = 1500;
-    const PULSE_MAX_US: u64 = 1800;
+    // const PULSE_MIN_US: u64 = 1200;
+    // const PULSE_NEUTRAL_US: u64 = 1500;
+    // const PULSE_MAX_US: u64 = 1800;
     let pin_num = 23; // BCM pin 23 is physical pin 16
     let mut pin = Gpio::new()?.get(pin_num)?.into_output();
 
@@ -72,7 +29,7 @@ fn feldspar_parachute(_seconds_to_wait: u64, cmds: Vec<u64>) -> Result<(), Box<d
     for cmd in cmds {
         pin.set_pwm(
             Duration::from_millis(PERIOD_MS),
-            Duration::from_micros(cmd),
+            Duration::from_micros(cmd),  // 1000 micros = 1 milli.
         )?;
 
         // Sleep for 500 ms while the servo moves into position.
