@@ -138,7 +138,7 @@ fn main() {
         println!("{}", i);
     }
 
-    feldspar_parachute(7, vec![[2500, 500]]);
+    feldspar_parachute(7, vec![[2500, 500], [500, 500]]);
     println!("Deploy!");
 
     cam_thread.join().unwrap();
