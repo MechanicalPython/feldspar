@@ -1,5 +1,4 @@
 
-#[allow(warnings)]
 use std::env;
 use std::error::Error;
 use std::thread;
@@ -10,9 +9,9 @@ use rppal::gpio::Gpio;
 
 fn feldspar_parachute(_seconds_to_wait: u64, cmds: Vec<u64>) -> Result<(), Box<dyn Error>> {
     const PERIOD_MS: u64 = 20;
-    const PULSE_MIN_US: u64 = 1200;
-    const PULSE_NEUTRAL_US: u64 = 1500;
-    const PULSE_MAX_US: u64 = 1800;
+    // const PULSE_MIN_US: u64 = 1200;
+    // const PULSE_NEUTRAL_US: u64 = 1500;
+    // const PULSE_MAX_US: u64 = 1800;
     let pin_num = 23; // BCM pin 23 is physical pin 16
     let mut pin = Gpio::new()?.get(pin_num)?.into_output();
 
@@ -39,5 +38,5 @@ fn main() {
     for a in args.iter() {
         parachute_args.push(a.parse::<u64>().unwrap())
     }
-    feldspar_parachute(7, parachute_args);
+    let _ = feldspar_parachute(7, parachute_args);
 }
