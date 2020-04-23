@@ -101,7 +101,12 @@ fn main() {
     let launch_duration = launch_duration
         .parse::<u64>()
         .expect("Please enter a valid integer for launch duration");
-    let feldspar_number = args.get(2).expect("Please enter feldspar launch number.");
+
+    let deploy_delay = args.get(2).expect("Enter a parachute deployment time");
+    let deploy_delay = deploy_delay.parse::<u64>().expect("Enter a valid integer for deployment time (seconds)");
+
+
+    let feldspar_number = args.get(3).expect("Please enter feldspar launch number.");
 
     let vid_name = format!("./feldspar{}_vid.h264", feldspar_number);
     let gps_file_name = format!("./feldspar{}_gps.txt", feldspar_number);
@@ -110,9 +115,8 @@ fn main() {
         panic!("Change feldspar launch type, there is a file name conflict.")
     }
 
-    let deploy_delay = 7;
     println!("Standby for feldspar launch {}...", feldspar_number);
-    println!("Instrument recording time is {}", launch_duration);
+    println!("Total rocket flight time is {}", launch_duration);
     println!("Parachute deploy in {} seconds after launch", deploy_delay);
 
     println!("Init servo");
