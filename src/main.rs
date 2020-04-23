@@ -110,8 +110,10 @@ fn main() {
         panic!("Change feldspar launch type, there is a file name conflict.")
     }
 
+    let deploy_delay = 7;
     println!("Standby for feldspar launch {}...", feldspar_number);
     println!("Instrument recording time is {}", launch_duration);
+    println!("Parachute deploy in {} seconds after launch", launch_duration);
 
     println!("Init servo");
     feldspar_parachute(0, vec![[500, 500]]);
@@ -135,7 +137,7 @@ fn main() {
     }
     println!("Launch!");
 
-    for i in 0..7 {
+    for i in 0..deploy_delay {
         println!("-{}", i);
         thread::sleep(Duration::from_secs(1));
     }
