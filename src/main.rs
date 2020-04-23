@@ -83,7 +83,6 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
     for cmd_pair in cmds {
         let cmd = cmd_pair[0];
         let wait = cmd_pair[1];
-        dbg!(&cmd, &wait);
         pin.set_pwm(
             Duration::from_millis(PERIOD_MS),
             Duration::from_micros(cmd),  // 1000 micros = 1 milli.
