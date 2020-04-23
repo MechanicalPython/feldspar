@@ -82,7 +82,8 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) -> Result<(), B
     // Enable software-based PWM with the specified period, and rotate the servo by
     // setting the pulse width to its maximum value.
     for cmd_pair in cmds {
-        let (cmd, wait) = cmd_pair;
+        let cmd = cmd_pair[0];
+        let wait = cmd_pair[1];
         pin.set_pwm(
             Duration::from_millis(PERIOD_MS),
             Duration::from_micros(cmd),  // 1000 micros = 1 milli.
