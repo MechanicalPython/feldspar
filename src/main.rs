@@ -70,13 +70,13 @@ fn feldspar_cam(seconds: u64, vid_file: &str) {
 /// Over 3000 = 1.5 (and a bit) rotations anti-clockwise.
 /// 6000 - 8000 = 6 oclock shuffle: as a clock, the arm goes 5 - 7 three times.
 /// 10000 = 1.5 rotations clockwise
-fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) -> Result<(), Box<dyn Error>> {
+fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
     const PERIOD_MS: u64 = 20;
     // const PULSE_MIN_US: u64 = 1200;
     // const PULSE_NEUTRAL_US: u64 = 1500;
     // const PULSE_MAX_US: u64 = 1800;
     let pin_num = 23; // BCM pin 23 is physical pin 16
-    let mut pin = Gpio::new()?.get(pin_num)?.into_output();
+    let mut pin = Gpio::new().unwrap().get(pin_num).unwrap().into_output();
 
     thread::sleep(Duration::from_secs(seconds_to_wait));
     // Enable software-based PWM with the specified period, and rotate the servo by
@@ -87,11 +87,10 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) -> Result<(), B
         pin.set_pwm(
             Duration::from_millis(PERIOD_MS),
             Duration::from_micros(cmd),  // 1000 micros = 1 milli.
-        )?;
+        ).unwrap();
         // Sleep for 500 ms while the servo moves into position.
         thread::sleep(Duration::from_millis(wait));
     }
-    Ok(())
 }
 
 fn main() {
@@ -139,7 +138,6 @@ fn main() {
     for i in (0..launch_duration - 10).rev() {
         println!("{}", i);
     }
-
 
     feldspar_parachute(7, vec![[2500, 0]]);
     println!("Deploy!");
