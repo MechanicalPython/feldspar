@@ -1,5 +1,3 @@
-
-#[allow(warnings)]
 use std::env;
 use std::error::Error;
 use std::fs::OpenOptions;
@@ -86,55 +84,51 @@ fn feldspar_parachute(_seconds_to_wait: u64, cmds: Vec<u64>) -> Result<(), Box<d
 
 fn main() {
     let mut args: Vec<String> = env::args().collect();
-    //
-    // let launch_duration: &str = args
-    //     .get(1)
-    //     .expect("Please enter an instrument recording time (seconds)");
-    // let launch_duration = launch_duration
-    //     .parse::<u64>()
-    //     .expect("Please enter a valid integer for launch duration");
-    // let feldspar_number = args.get(2).expect("Please enter feldspar launch number.");
-    //
-    // let vid_name = format!("./feldspar{}_vid.h264", feldspar_number);
-    // let gps_file_name = format!("./feldspar{}_gps.txt", feldspar_number);
-    //
-    // if Path::new(vid_name.as_str()).exists() || Path::new(gps_file_name.as_str()).exists() {
-    //     panic!("Change feldspar launch type, there is a file name conflict.")
-    // }
-    //
-    // println!("Standby for feldspar launch {}...", feldspar_number);
-    // thread::sleep(Duration::from_secs(2));
-    // println!("Instrument recording time is {}", launch_duration);
-    //
-    // println!("Press enter to begin launch countdown.");
-    // let mut s = String::new();
-    // let _stdin = io::stdin().read_line(&mut s).unwrap();
-    //
-    // let gps_thread = thread::spawn(move || {
-    //     println!("Starting gps...");
-    //     feldspar_gps(launch_duration + 10, gps_file_name.as_str())
-    // });
-    //
-    // let cam_thread = thread::spawn(move || {
-    //     println!("Starting camera...");
-    //     feldspar_cam(launch_duration + 10, vid_name.as_str());
-    // });
-    //
-    // for i in (1..11).rev() {
-    //     println!("{}", i);
-    //     thread::sleep(Duration::from_secs(1));
-    // }
-    // println!("Launch!");
-    // for i in (0..launch_duration - 10).rev() {
-    //     println!("{}", i);
-    // }
-    args.remove(0);
-    let mut parachute_args = Vec::new();
-    for a in args.iter() {
-        parachute_args.push(a.parse::<u64>().unwrap())
+
+    let launch_duration: &str = args
+        .get(1)
+        .expect("Please enter an instrument recording time (seconds)");
+    let launch_duration = launch_duration
+        .parse::<u64>()
+        .expect("Please enter a valid integer for launch duration");
+    let feldspar_number = args.get(2).expect("Please enter feldspar launch number.");
+
+    let vid_name = format!("./feldspar{}_vid.h264", feldspar_number);
+    let gps_file_name = format!("./feldspar{}_gps.txt", feldspar_number);
+
+    if Path::new(vid_name.as_str()).exists() || Path::new(gps_file_name.as_str()).exists() {
+        panic!("Change feldspar launch type, there is a file name conflict.")
     }
+
+    println!("Standby for feldspar launch {}...", feldspar_number);
+    thread::sleep(Duration::from_secs(2));
+    println!("Instrument recording time is {}", launch_duration);
+
+    println!("Press enter to begin launch countdown.");
+    let mut s = String::new();
+    let _stdin = io::stdin().read_line(&mut s).unwrap();
+
+    let gps_thread = thread::spawn(move || {
+        println!("Starting gps...");
+        feldspar_gps(launch_duration + 10, gps_file_name.as_str())
+    });
+
+    let cam_thread = thread::spawn(move || {
+        println!("Starting camera...");
+        feldspar_cam(launch_duration + 10, vid_name.as_str());
+    });
+
+    for i in (1..11).rev() {
+        println!("{}", i);
+        thread::sleep(Duration::from_secs(1));
+    }
+    println!("Launch!");
+    for i in (0..launch_duration - 10).rev() {
+        println!("{}", i);
+    }
+
     feldspar_parachute(7, parachute_args);
 
-    // cam_thread.join().unwrap();
-    // gps_thread.join().unwrap();
+    cam_thread.join().unwrap();
+    gps_thread.join().unwrap();
 }
