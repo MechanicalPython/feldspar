@@ -13,8 +13,7 @@ fn main() {
 
     loop {
         let gps_values = gps.update();
-
-        println!(format!(
+        println!(
                 "{:?},{:?},{:?},{:?},{:?},{:?}\n",
                 gps_values.utc,
                 gps_values.latitude,
@@ -22,7 +21,6 @@ fn main() {
                 gps_values.speed_kph,
                 gps_values.geoidal_spe,
                 gps_values.altitude
-            )
-        )
+            );
     }
 }
