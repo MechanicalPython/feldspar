@@ -1,6 +1,3 @@
-use std::fs::OpenOptions;
-use std::thread;
-
 use adafruit_gps::gps::{GetGpsData, Gps, open_port};
 use adafruit_gps::PMTK::send_pmtk::SendPmtk;
 
