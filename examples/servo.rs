@@ -1,7 +1,7 @@
 use rppal::gpio::Gpio;
 use std::env;
 use std::thread;
-use std::time::{Duration, SystemTime};
+use std::time::{Duration};
 
 fn main() {
     let mut args: Vec<String> = env::args().collect();
@@ -15,7 +15,7 @@ fn main() {
     for arg in args {
         pin.set_pwm(
             Duration::from_millis(PERIOD_MS),
-            Duration::from_micros(arg),  // 1000 micros = 1 milli.
+            Duration::from_micros(arg.parse::<u64>().unwrap()),  // 1000 micros = 1 milli.
         ).unwrap();
         // Sleep for 500 ms while the servo moves into position.
         thread::sleep(Duration::from_millis(1000));
