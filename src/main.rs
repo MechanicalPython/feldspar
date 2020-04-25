@@ -10,6 +10,7 @@ use adafruit_gps::gps::{GetGpsData, Gps, open_port};
 use adafruit_gps::PMTK::send_pmtk::SendPmtk;
 use rppal::gpio::Gpio;
 
+// todo, wait till gps fix is acquired.
 fn feldspar_gps(capture_duration: u64, file_name: &str) {
     let port = open_port("/dev/serial0");
     let mut gps = Gps { port };
