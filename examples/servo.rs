@@ -14,7 +14,7 @@ fn main() {
     // setting the pulse width to its maximum value.
     for arg in args {
         pin.set_pwm(
-            Duration::from_millis(PERIOD_MS),
+            Duration::from_millis(20),
             Duration::from_micros(arg.parse::<u64>().unwrap()),  // 1000 micros = 1 milli.
         ).unwrap();
         // Sleep for 500 ms while the servo moves into position.
