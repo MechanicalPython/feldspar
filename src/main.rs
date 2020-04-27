@@ -121,7 +121,7 @@ fn main() {
     println!("Parachute deploy in {} seconds after launch", deploy_delay);
 
     println!("Init servo");
-    feldspar_parachute(0, vec![[500, 500]]);
+    feldspar_parachute(0, vec![[2500, 500]]);
     println!("Press enter to begin launch countdown.");
     let mut s = String::new();
     let _stdin = io::stdin().read_line(&mut s).unwrap();
@@ -147,7 +147,7 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
     println!("Deploy!");
-    feldspar_parachute(0, vec![[2500, 1000], [500, 500]]);
+    feldspar_parachute(0, vec![[500, 1000], [2500, 500]]);
 
     cam_thread.join().unwrap();
     gps_thread.join().unwrap();
