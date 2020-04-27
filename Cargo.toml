@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 adafruit_gps = "0.2.0"
 rppal = "0.11.3"
+clap = "2.33.0"
 
 [profile.release]
 codegen-units = 1
