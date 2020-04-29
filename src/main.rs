@@ -71,7 +71,7 @@ fn gps_checker() {
         }
         let stdin = io::stdin();
 
-        if stdin.lock().read_line() == "\n"{
+        if stdin.lock().lines().unwrap() == "\n"{
             break
         }
     }
@@ -200,7 +200,8 @@ fn main() {
         feldspar_parachute(deploy_delay, vec![[500, 1000], [2500, 500]]);
         println!("Deployed!");
     });
-    for i in recording_duration {
+
+    for i in 1..recording_duration {
         println!("-{}",i)
     }
 
