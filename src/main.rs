@@ -2,7 +2,7 @@ use std::fs::OpenOptions;
 use std::io::{self, Write};
 use std::io::stdout;
 use std::path::Path;
-use std::process::{Command};
+use std::process::Command;
 use std::thread;
 use std::time::{Duration, SystemTime};
 
@@ -27,7 +27,7 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
         .open(file_name) // fails if no file.
         .expect("cannot open file");
 
-    let mut max_alt:f32 = 0.0;
+    let mut max_alt: f32 = 0.0;
     let start_time = SystemTime::now();
     while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
         let gps_values = gps.update();
@@ -50,7 +50,7 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
             )
             .expect("Failed to write line");
     }
-    return max_alt
+    return max_alt;
 }
 
 fn gps_checker() {
@@ -63,15 +63,11 @@ fn gps_checker() {
 
     loop {
         let gps_values = gps.update();
+        handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes()).unwrap();
         if gps_values.sats_used < 5 {
-            for i in 0..10 {
-                handle.write_all(format!("\r{}", i).as_bytes()).unwrap();
-                handle.flush().unwrap();
-                thread::sleep(Duration::from_millis(1000));
-            }
+            thread::sleep(Duration::from_millis(1000));
         } else {
-            handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes()).unwrap();
-            break
+            break;
         }
     }
 }
@@ -201,5 +197,4 @@ fn main() {
     cam_thread.join().unwrap();
     gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
-
 }
