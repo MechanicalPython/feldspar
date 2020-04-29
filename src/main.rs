@@ -110,6 +110,7 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
 
     for i in 1..seconds_to_wait+1 {
         println!("Deploy in {}", i);
+        thread::sleep(Duration::from_secs(1));
     }
     // Enable software-based PWM with the specified period, and rotate the servo by
     // setting the pulse width to its maximum value.
