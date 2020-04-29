@@ -33,6 +33,9 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) {
 
         gps_file
             .write_all(
+                // todo  Add number of satellites,
+                // print height over time in real time.
+                //
                 format!(
                     "{:?},{:?},{:?},{:?},{:?},{:?}\n",
                     gps_values.utc,
