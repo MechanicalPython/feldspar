@@ -71,11 +71,11 @@ fn gps_checker() {
             println!("\nPress enter to continue the search. Press c to cancel search and continue.");
             let mut s = String::new();
             io::stdin().read_line(&mut s).unwrap();
-            if s == "c".to_string() {
+            if s.trim() == "c".to_string() {
                 println!("break");
                 return ()
             } else {
-                continue
+                count = 0;
             }
         }
     }
