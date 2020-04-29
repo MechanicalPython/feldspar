@@ -159,7 +159,7 @@ fn main() {
     }
 
     println!("Standby for feldspar launch {}...", feldspar_number);
-    println!("Total rocket flight time is {}", launch_duration);
+    println!("Total rocket flight time is {}", recording_duration);
     println!("Parachute deploy in {} seconds after launch", deploy_delay);
 
 
@@ -179,7 +179,7 @@ fn main() {
 
     let gps_thread = thread::spawn(move || {
         println!("Starting gps...");
-        let max_alt = feldspar_gps(recording_duration + 10, gps_file_name.as_str())
+        let max_alt = feldspar_gps(recording_duration + 10, gps_file_name.as_str());
         println!("Maximum altitude: {}", max_alt);
     });
 
