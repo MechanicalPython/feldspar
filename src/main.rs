@@ -64,6 +64,7 @@ fn gps_checker() {
     loop {
         let gps_values = gps.update();
         handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes()).unwrap();
+        handle.flush();
         if gps_values.sats_used < 5 {
             thread::sleep(Duration::from_millis(1000));
         } else {
