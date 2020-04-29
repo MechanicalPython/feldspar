@@ -1,15 +1,14 @@
-use std::env;
 use std::fs::OpenOptions;
 use std::io::{self, Write};
 use std::io::stdout;
 use std::path::Path;
-use std::process::{Command, ExitStatus, Output};
+use std::process::{Command};
 use std::thread;
 use std::time::{Duration, SystemTime};
 
 use adafruit_gps::gps::{GetGpsData, Gps, open_port};
 use adafruit_gps::PMTK::send_pmtk::SendPmtk;
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
@@ -71,7 +70,7 @@ fn gps_checker() {
                 thread::sleep(Duration::from_millis(1000));
             }
         } else {
-            handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes())
+            handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes());
             break
         }
     }
@@ -144,13 +143,13 @@ fn main() {
         .get_matches();
 
 
-    let recording_duration = args.value_of("Recording duration")
+    let recording_duration = args.value_of("Recording duration").unwrap()
         .parse::<u64>()
         .expect("Please enter a valid integer for launch duration");
 
-    let deploy_delay = args.value_of("Parachute Deployment Max Time").parse::<u64>().expect("Enter a valid integer for deployment time (seconds)");
+    let deploy_delay = args.value_of("Parachute Deployment Max Time").unwrap().parse::<u64>().expect("Enter a valid integer for deployment time (seconds)");
 
-    let feldspar_number = args.value_of("Flight Name");
+    let feldspar_number = args.value_of("Flight Name").unwrap();
 
     let vid_name = format!("./feldspar{}_vid.h264", feldspar_number);
     let gps_file_name = format!("./feldspar{}_gps.txt", feldspar_number);
