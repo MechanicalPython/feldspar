@@ -1,5 +1,5 @@
 use std::fs::OpenOptions;
-use std::io::{self, Write, stdout, BufRead, stdin, Read};
+use std::io::{self, Write, stdout};
 use std::path::Path;
 use std::process::Command;
 use std::thread;
@@ -70,8 +70,8 @@ fn gps_checker() {
         if count > 5 {
             println!("Press enter to continue the search. Press c to cancel search and continue.");
             let mut s = String::new();
-            let stdin = io::stdin().read_line(&mut s);
-            if stdin == "c" {
+            let stdin = io::stdin().read_line(&mut s).unwrap();
+            if stdin == "c".to_string().parse().unwrap() {
                 return ()
             } else {
                 continue
