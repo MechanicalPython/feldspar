@@ -1,5 +1,5 @@
 use std::fs::OpenOptions;
-use std::io::{self, Write, stdout, BufRead};
+use std::io::{self, Write, stdout, BufRead, stdin, Read};
 use std::path::Path;
 use std::process::Command;
 use std::thread;
@@ -60,19 +60,22 @@ fn gps_checker() {
     let stdout = stdout();
     let mut handle = stdout.lock();
 
+    let mut count = 0;
     loop {
         let gps_values = gps.update();
         handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes()).unwrap();
         handle.flush();
-        if gps_values.sats_used < 5 {
-            thread::sleep(Duration::from_millis(1000));
-        } else {
-            break;
-        }
-        let stdin = io::stdin();
-
-        if stdin.lock().lines() == "\n"{
-            break
+        thread::sleep(Duration::from_millis(1000));
+        count += 1;
+        if count > 5 {
+            println!("Press enter to continue the search. Press c to cancel search and continue.");
+            let mut s = String::new();
+            let stdin = io::stdin().read_line(&mut s);
+            if stdin == "c" {
+                return ()
+            } else {
+                continue
+            }
         }
     }
 }
