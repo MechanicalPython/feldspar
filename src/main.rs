@@ -108,7 +108,7 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
     let pin_num = 23; // BCM pin 23 is physical pin 16
     let mut pin = Gpio::new().unwrap().get(pin_num).unwrap().into_output();
 
-    for i in 1..seconds_to_wait+1 {
+    for i in (1..seconds_to_wait+1).rev() {
         println!("Deploy in {}", i);
         thread::sleep(Duration::from_secs(1));
     }
@@ -207,7 +207,8 @@ fn main() {
     });
 
     for i in 1..recording_duration {
-        println!("-{}",i)
+        println!("-{}",i);
+        thread::sleep(Duration::from_secs(1));
     }
 
     cam_thread.join().unwrap();
