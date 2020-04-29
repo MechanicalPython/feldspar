@@ -16,7 +16,7 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let mut gps = Gps { port };
 
     gps.pmtk_314_api_set_nmea_output(0, 0, 1, 1, 1, 1, 1);
-    let pmtk001 = gps.pmtk_220_set_nmea_updaterate("1000");
+    let _pmtk001 = gps.pmtk_220_set_nmea_updaterate("1000");
     let _file = OpenOptions::new()
         .write(true)
         .create_new(true)
@@ -66,11 +66,11 @@ fn gps_checker() {
         if gps_values.sats_used < 5 {
             for i in 0..10 {
                 handle.write_all(format!("\r{}", i).as_bytes()).unwrap();
-                handle.flush();
+                handle.flush().unwrap();
                 thread::sleep(Duration::from_millis(1000));
             }
         } else {
-            handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes());
+            handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes()).unwrap();
             break
         }
     }
