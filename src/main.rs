@@ -71,7 +71,7 @@ fn gps_checker() {
         }
         let stdin = io::stdin();
 
-        if stdin.lock().lines().unwrap() == "\n"{
+        if stdin.lock().lines() == "\n"{
             break
         }
     }
