@@ -70,8 +70,8 @@ fn gps_checker() {
         if count > 5 {
             println!("Press enter to continue the search. Press c to cancel search and continue.");
             let mut s = String::new();
-            let stdin = io::stdin().read_line(&mut s).unwrap();
-            if stdin == "c".to_string().parse().unwrap() {
+            io::stdin().read_line(&mut s).unwrap();
+            if s == "c".to_string() {
                 return ()
             } else {
                 continue
