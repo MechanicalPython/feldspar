@@ -1,8 +1,9 @@
 use std::env;
 use std::fs::OpenOptions;
 use std::io::{self, Write};
+use std::io::stdout;
 use std::path::Path;
-use std::process::Command;
+use std::process::{Command, ExitStatus, Output};
 use std::thread;
 use std::time::{Duration, SystemTime};
 
@@ -11,14 +12,12 @@ use adafruit_gps::PMTK::send_pmtk::SendPmtk;
 use clap::{App, Arg, SubCommand};
 use rppal::gpio::Gpio;
 
-// todo, wait till gps fix is acquired.
-fn feldspar_gps(capture_duration: u64, file_name: &str) {
+fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let port = open_port("/dev/serial0");
     let mut gps = Gps { port };
 
     gps.pmtk_314_api_set_nmea_output(0, 0, 1, 1, 1, 1, 1);
-    let pmtk001 = gps.pmtk_220_set_nmea_updaterate("600");
-    dbg!(pmtk001);
+    let pmtk001 = gps.pmtk_220_set_nmea_updaterate("1000");
     let _file = OpenOptions::new()
         .write(true)
         .create_new(true)
@@ -28,20 +27,22 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) {
         .append(true)
         .open(file_name) // fails if no file.
         .expect("cannot open file");
+
+    let mut max_alt:f32 = 0.0;
     let start_time = SystemTime::now();
     while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
         let gps_values = gps.update();
-
+        if gps_values.altitude.unwrap_or(0.0) > max_alt {
+            max_alt = gps_values.altitude.unwrap()
+        }
         gps_file
             .write_all(
-                // todo  Add number of satellites,
-                // print height over time in real time.
-                //
                 format!(
-                    "{:?},{:?},{:?},{:?},{:?},{:?}\n",
+                    "{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
                     gps_values.utc,
                     gps_values.latitude,
                     gps_values.longitude,
+                    gps_values.sats_used,
                     gps_values.speed_kph,
                     gps_values.geoidal_spe,
                     gps_values.altitude
@@ -49,6 +50,30 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) {
                     .as_bytes(),
             )
             .expect("Failed to write line");
+    }
+    return max_alt
+}
+
+fn gps_checker() {
+    let port = open_port("/dev/serial0");
+    let mut gps = Gps { port };
+
+    gps.pmtk_314_api_set_nmea_output(0, 0, 1, 1, 1, 1, 1);
+    let stdout = stdout();
+    let mut handle = stdout.lock();
+
+    loop {
+        let gps_values = gps.update();
+        if gps_values.sats_used < 5 {
+            for i in 0..10 {
+                handle.write_all(format!("\r{}", i).as_bytes()).unwrap();
+                handle.flush();
+                thread::sleep(Duration::from_millis(1000));
+            }
+        } else {
+            handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes())
+            break
+        }
     }
 }
 
@@ -76,9 +101,6 @@ fn feldspar_cam(seconds: u64, vid_file: &str) {
 /// 10000 = 1.5 rotations clockwise
 fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
     const PERIOD_MS: u64 = 20;
-    // const PULSE_MIN_US: u64 = 1200;
-    // const PULSE_NEUTRAL_US: u64 = 1500;
-    // const PULSE_MAX_US: u64 = 1800;
     let pin_num = 23; // BCM pin 23 is physical pin 16
     let mut pin = Gpio::new().unwrap().get(pin_num).unwrap().into_output();
 
@@ -141,20 +163,30 @@ fn main() {
     println!("Total rocket flight time is {}", launch_duration);
     println!("Parachute deploy in {} seconds after launch", deploy_delay);
 
-    println!("Init servo");
+
+    println!("Initialise servo");
     feldspar_parachute(0, vec![[2500, 500]]);
+
+    println!("Check camera");
+    feldspar_cam(1, "./test_vid.h264");
+
+    println!("Check Gps");
+    gps_checker();
+
     println!("Press enter to begin launch countdown.");
     let mut s = String::new();
     let _stdin = io::stdin().read_line(&mut s).unwrap();
 
+
     let gps_thread = thread::spawn(move || {
         println!("Starting gps...");
-        feldspar_gps(launch_duration + 10, gps_file_name.as_str())
+        let max_alt = feldspar_gps(recording_duration + 10, gps_file_name.as_str())
+        println!("Maximum altitude: {}", max_alt);
     });
 
     let cam_thread = thread::spawn(move || {
         println!("Starting camera...");
-        feldspar_cam(launch_duration + 10, vid_name.as_str());
+        feldspar_cam(recording_duration + 10, vid_name.as_str());
     });
 
     for i in (1..11).rev() {
@@ -162,14 +194,13 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
     println!("Launch!");
-
-    for i in 0..deploy_delay {
-        println!("-{}", i);
-        thread::sleep(Duration::from_secs(1));
-    }
-    println!("Deploy!");
-    feldspar_parachute(0, vec![[500, 1000], [2500, 500]]);
+    let parachute_thread = thread::spawn(move || {
+        feldspar_parachute(deploy_delay, vec![[500, 1000], [2500, 500]]);
+        println!("Deployed!");
+    });
 
     cam_thread.join().unwrap();
     gps_thread.join().unwrap();
+    parachute_thread.join().unwrap();
+
 }
