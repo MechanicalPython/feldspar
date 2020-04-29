@@ -8,6 +8,7 @@ use std::time::{Duration, SystemTime};
 
 use adafruit_gps::gps::{GetGpsData, Gps, open_port};
 use adafruit_gps::PMTK::send_pmtk::SendPmtk;
+use clap::{App, Arg, SubCommand};
 use rppal::gpio::Gpio;
 
 // todo, wait till gps fix is acquired.
@@ -97,20 +98,37 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let args = App::new("Feldspar Launch Protocol")
+        .version("1.0")
+        .author("Matt")
+        .arg(Arg::with_name("Recording duration")
+            .short("d")
+            .long("duration")
+            .value_name("RECORDING DURATION")
+            .help("Sets the amount of time you want the instruments to record.")
+            .takes_value(true))
+        .arg(Arg::with_name("Parachute Deployment Max Time")
+            .short("p")
+            .long("parachute")
+            .value_name("Parachute Delay")
+            .help("Sets the maximum time delay after launch when the parachute will deploy")
+            .takes_value(true))
+        .arg(Arg::with_name("Flight Name")
+            .short("n")
+            .long("name")
+            .value_name("Flight Name")
+            .help("The name of the launch: 3-0 or 4-5")
+            .takes_value(true))
+        .get_matches();
 
-    let launch_duration: &str = args
-        .get(1)
-        .expect("Please enter an instrument recording time (seconds)");
-    let launch_duration = launch_duration
+
+    let recording_duration = args.value_of("Recording duration")
         .parse::<u64>()
         .expect("Please enter a valid integer for launch duration");
 
-    let deploy_delay = args.get(2).expect("Enter a parachute deployment time");
-    let deploy_delay = deploy_delay.parse::<u64>().expect("Enter a valid integer for deployment time (seconds)");
+    let deploy_delay = args.value_of("Parachute Deployment Max Time").parse::<u64>().expect("Enter a valid integer for deployment time (seconds)");
 
-
-    let feldspar_number = args.get(3).expect("Please enter feldspar launch number.");
+    let feldspar_number = args.value_of("Flight Name");
 
     let vid_name = format!("./feldspar{}_vid.h264", feldspar_number);
     let gps_file_name = format!("./feldspar{}_gps.txt", feldspar_number);
