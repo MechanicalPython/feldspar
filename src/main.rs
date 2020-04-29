@@ -72,7 +72,6 @@ fn gps_checker() {
             let mut s = String::new();
             io::stdin().read_line(&mut s).unwrap();
             if s.trim() == "c".to_string() {
-                println!("break");
                 return ()
             } else {
                 count = 0;
