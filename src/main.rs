@@ -68,10 +68,11 @@ fn gps_checker() {
         thread::sleep(Duration::from_millis(1000));
         count += 1;
         if count > 5 {
-            println!("Press enter to continue the search. Press c to cancel search and continue.");
+            println!("\nPress enter to continue the search. Press c to cancel search and continue.");
             let mut s = String::new();
             io::stdin().read_line(&mut s).unwrap();
             if s == "c".to_string() {
+                println!("break");
                 return ()
             } else {
                 continue
