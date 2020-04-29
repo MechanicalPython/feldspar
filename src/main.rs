@@ -1,6 +1,5 @@
 use std::fs::OpenOptions;
-use std::io::{self, Write};
-use std::io::stdout;
+use std::io::{self, Write, stdout, BufRead};
 use std::path::Path;
 use std::process::Command;
 use std::thread;
@@ -70,6 +69,11 @@ fn gps_checker() {
         } else {
             break;
         }
+        let stdin = io::stdin();
+
+        if stdin.lock().read_line() == "\n"{
+            break
+        }
     }
 }
 
@@ -100,7 +104,9 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
     let pin_num = 23; // BCM pin 23 is physical pin 16
     let mut pin = Gpio::new().unwrap().get(pin_num).unwrap().into_output();
 
-    thread::sleep(Duration::from_secs(seconds_to_wait));
+    for i in 1..seconds_to_wait+1 {
+        println!("Deploy in {}", i);
+    }
     // Enable software-based PWM with the specified period, and rotate the servo by
     // setting the pulse width to its maximum value.
     for cmd_pair in cmds {
@@ -194,6 +200,9 @@ fn main() {
         feldspar_parachute(deploy_delay, vec![[500, 1000], [2500, 500]]);
         println!("Deployed!");
     });
+    for i in recording_duration {
+        println!("-{}",i)
+    }
 
     cam_thread.join().unwrap();
     gps_thread.join().unwrap();
