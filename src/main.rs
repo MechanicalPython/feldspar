@@ -174,7 +174,8 @@ fn main() {
 
     let cam_thread = thread::spawn(move || {
         println!("Starting camera...");
-        feldspar_cam(vid_name.as_str());
+        let r = feldspar_cam(vid_name.as_str());
+        println!("{:?}", r.stderr);
     });
 
 
