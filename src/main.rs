@@ -83,13 +83,12 @@ fn gps_checker() {
     }
 }
 
-fn feldspar_cam(seconds: u64, vid_file: &str) -> Output {
-    let mili = Duration::from_secs(seconds).as_millis().to_string();
+fn feldspar_cam(vid_file: &str) -> Output {
     let c = Command::new("raspivid")
         .arg("-o")
         .arg(vid_file)
         .arg("-t")
-        .arg(mili.as_str())
+        .arg("0")
         .output()
         .expect("Camera failed to open.");
     return c
@@ -173,16 +172,15 @@ fn main() {
     println!("Total rocket flight time is {}", recording_duration);
     println!("Parachute deploy in {} seconds after launch", deploy_delay);
 
+    let cam_thread = thread::spawn(move || {
+        println!("Starting camera...");
+        feldspar_cam(vid_name.as_str());
+    });
+
 
     println!("Initialise servo");
     feldspar_parachute(0, vec![[2500, 500]]);
 
-    let r = feldspar_cam(1, "./test_vid.h264");
-    if r.status.code().unwrap_or_default() == 0 {
-        println!("Camera OK")
-    } else {
-        println!("Camera error. Check connection")
-    }
 
     println!("Check Gps");
     gps_checker();
@@ -198,10 +196,6 @@ fn main() {
         println!("Maximum altitude: {}", max_alt);
     });
 
-    let cam_thread = thread::spawn(move || {
-        println!("Starting camera...");
-        feldspar_cam(recording_duration + 10, vid_name.as_str());
-    });
 
     for i in (1..11).rev() {
         println!("{}", i);
@@ -218,7 +212,6 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
 
-    cam_thread.join().unwrap();
     gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
 }
