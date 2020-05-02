@@ -83,15 +83,16 @@ fn gps_checker() {
     }
 }
 
-fn feldspar_cam(seconds: u64, vid_file: &str) {
+fn feldspar_cam(seconds: u64, vid_file: &str) -> Process::Output {
     let mili = Duration::from_secs(seconds).as_millis().to_string();
-    let _c = Command::new("raspivid")
+    let c = Command::new("raspivid")
         .arg("-o")
         .arg(vid_file)
         .arg("-t")
         .arg(mili.as_str())
         .output()
         .expect("Camera failed to open.");
+    return c
 }
 
 /// Servo motor has a period of 50Hz (20ms).
