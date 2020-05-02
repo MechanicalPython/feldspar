@@ -6,7 +6,7 @@ use std::thread;
 use std::time::{Duration, SystemTime};
 
 use adafruit_gps::gps::{GetGpsData, Gps, open_port};
-use adafruit_gps::PMTK::send_pmtk::{SendPmtk, set_baud_rate};
+use adafruit_gps::PMTK::send_pmtk::{set_baud_rate};
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
@@ -51,7 +51,7 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
 }
 
 fn gps_checker() {
-    set_baud_rate("57600", "/dev/serial0");
+    let _ = set_baud_rate("57600", "/dev/serial0");
 
     let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port, satellite_data: false, naviagtion_data: true };
