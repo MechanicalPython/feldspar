@@ -1,7 +1,7 @@
 use std::fs::OpenOptions;
 use std::io::{self, Write, stdout};
 use std::path::Path;
-use std::process::Command;
+use std::process::{Command, Output};
 use std::thread;
 use std::time::{Duration, SystemTime};
 
@@ -83,7 +83,7 @@ fn gps_checker() {
     }
 }
 
-fn feldspar_cam(seconds: u64, vid_file: &str) -> Process::Output {
+fn feldspar_cam(seconds: u64, vid_file: &str) -> Output {
     let mili = Duration::from_secs(seconds).as_millis().to_string();
     let c = Command::new("raspivid")
         .arg("-o")
