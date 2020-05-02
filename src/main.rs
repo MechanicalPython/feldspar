@@ -177,9 +177,12 @@ fn main() {
     println!("Initialise servo");
     feldspar_parachute(0, vec![[2500, 500]]);
 
-    println!("Check camera");
     let r = feldspar_cam(1, "./test_vid.h264");
-    dbg!(r.status.code());
+    if r.status.code().unwrap_or_default() == 0 {
+        println!("Camera OK")
+    } else {
+        println!("Camera error. Check connection")
+    }
 
     println!("Check Gps");
     gps_checker();
