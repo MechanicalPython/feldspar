@@ -23,9 +23,9 @@ dependencies = [
 
 [[package]]
 name = "adafruit_gps"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c4f4f4137d7771324937a964abd64988e158b3d8d8277029d7ecc505b6d46b3"
+checksum = "bffaf9ec8dd5949451434cac6c3a769064974164892c5306bdcf4cdc0ada638f"
 dependencies = [
  "serialport",
 ]

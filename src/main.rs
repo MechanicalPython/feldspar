@@ -6,7 +6,7 @@ use std::thread;
 use std::time::{Duration, SystemTime};
 
 use adafruit_gps::gps::{GetGpsData, Gps, open_port};
-use adafruit_gps::PMTK::send_pmtk::SendPmtk;
+use adafruit_gps::PMTK::send_pmtk::{SendPmtk, set_baud_rate};
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
@@ -54,10 +54,11 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
 }
 
 fn gps_checker() {
-    let port = open_port("/dev/serial0");
-    let mut gps = Gps { port };
+    set_baud_rate("57600", "/dev/serial0");
 
-    gps.pmtk_314_api_set_nmea_output(0, 0, 1, 1, 1, 1, 1);
+    let port = open_port("/dev/serial0", 57600);
+    let mut gps = Gps { port, satellite_data: false, naviagtion_data: true };
+
     let stdout = stdout();
     let mut handle = stdout.lock();
 
@@ -66,9 +67,12 @@ fn gps_checker() {
         let gps_values = gps.update();
         handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes()).unwrap();
         handle.flush().unwrap();
-        thread::sleep(Duration::from_millis(1000));
+        thread::sleep(Duration::from_millis(100));
         count += 1;
         if count > 5 {
+            if gps_values.sats_used > 6 {
+                return ()
+            }
             println!("\nPress enter to continue the search. Press c to cancel search and continue.");
             let mut s = String::new();
             io::stdin().read_line(&mut s).unwrap();
