@@ -11,12 +11,9 @@ use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
-    let port = open_port("/dev/serial0", 19200);
+    let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port , satellite_data: false, naviagtion_data: true };
 
-    gps.pmtk_251_set_nmea_baudrate("19200");
-    gps.pmtk_314_api_set_nmea_output(0, 0, 1, 1, 1, 1, 1);
-    let _pmtk001 = gps.pmtk_220_set_nmea_updaterate("1000");
     let _file = OpenOptions::new()
         .write(true)
         .create_new(true)
@@ -58,6 +55,7 @@ fn gps_checker() {
 
     let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port, satellite_data: false, naviagtion_data: true };
+    gps.init("100");
 
     let stdout = stdout();
     let mut handle = stdout.lock();
