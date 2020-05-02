@@ -178,7 +178,8 @@ fn main() {
     feldspar_parachute(0, vec![[2500, 500]]);
 
     println!("Check camera");
-    feldspar_cam(1, "./test_vid.h264");
+    let r = feldspar_cam(1, "./test_vid.h264");
+    dbg!(r);
 
     println!("Check Gps");
     gps_checker();
