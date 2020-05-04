@@ -30,7 +30,7 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
         let gga_values = match gps.update() {
             GpsSentence::GGA(sentence) => sentence,
-            _ => GgaData.default(),
+            _ => GgaData::default(),
         };
 
         if gga_values.msl_alt.unwrap_or(0.0) > max_alt {
