@@ -4,6 +4,7 @@ use std::path::Path;
 use std::process::{Command, Output};
 use std::thread;
 use std::time::{Duration, SystemTime};
+use std::str;
 
 use adafruit_gps::gps::{Gps, open_port, GpsSentence};
 use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
