@@ -6,7 +6,7 @@ use std::thread;
 use std::time::{Duration, SystemTime};
 use std::str;
 
-use adafruit_gps::gps::{Gps, open_port, GpsSentence, PortConnection};
+use adafruit_gps::gps::{Gps, open_port, GpsSentence};
 use adafruit_gps::nmea::gga::{GgaData, SatFix};
 
 use clap::{App, Arg};
