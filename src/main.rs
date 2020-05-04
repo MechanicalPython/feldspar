@@ -69,7 +69,7 @@ fn gps_checker() {
     let port = open_port("/dev/serial0", 9600);
     let mut gps = Gps { port };
 
-    if gps.read_line() == PortConnection::NoConnection {
+    if gps.update() == GpsSentence::NoConnection {
         println!("GPS not connected");
         return ()
     }
