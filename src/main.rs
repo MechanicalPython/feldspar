@@ -6,7 +6,7 @@ use std::thread;
 use std::time::{Duration, SystemTime};
 use std::str;
 
-use adafruit_gps::gps::{Gps, open_port, GpsSentence};
+use adafruit_gps::gps::{Gps, open_port, GpsSentence, PortConnection};
 use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
@@ -66,20 +66,19 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
 }
 
 fn gps_checker() {
-    let port = open_port("/dev/serial0", 57600);
+    let port = open_port("/dev/serial0", 9600);
     let mut gps = Gps { port };
+
+    if gps.read_line() == PortConnection::NoConnection {
+        println!("GPS not connected");
+        return ()
+    }
+
     let nmea_output = gps.pmtk_314_api_set_nmea_output(0, 0, 0, 1, 0, 0, 1);
     println!("GGA output only: {:?}", nmea_output);
 
     let result = gps.pmtk_220_set_nmea_updaterate("100");
-    if result != Pmtk001Ack::Success {
-        let baud_result = set_baud_rate("57600", "/dev/serial0");
-        println!("{:?}", baud_result);
-        let result = gps.pmtk_220_set_nmea_updaterate("100");
-        println!("10Hz: {:?}", result);
-    } else {
-        println!("10Hz: {:?}", result);
-    }
+    println!("10Hz: {:?}", result);
 
     let stdout = stdout();
     let mut handle = stdout.lock();
