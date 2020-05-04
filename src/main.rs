@@ -5,14 +5,14 @@ use std::process::{Command, Output};
 use std::thread;
 use std::time::{Duration, SystemTime};
 
-use adafruit_gps::gps::{GetGpsData, Gps, open_port};
-use adafruit_gps::PMTK::send_pmtk::{set_baud_rate};
+use adafruit_gps::gps::{GetGpsData, Gps, open_port, GpsSentence};
+use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let port = open_port("/dev/serial0", 57600);
-    let mut gps = Gps { port , satellite_data: false, naviagtion_data: true };
+    let mut gps = Gps { port };
 
     let _file = OpenOptions::new()
         .write(true)
@@ -27,21 +27,25 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let mut max_alt: f32 = 0.0;
     let start_time = SystemTime::now();
     while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
-        let gps_values = gps.update();
-        if gps_values.altitude.unwrap_or(0.0) > max_alt {
+        let gga_values = match gps.update() {
+            GpsSentence::GGA(sentence) => {
+                sentence
+            }
+            _ => {}
+        };
+        if gga_values.msl_alt.unwrap_or(0.0) > max_alt {
             max_alt = gps_values.altitude.unwrap()
         }
         gps_file
             .write_all(
                 format!(
                     "{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
-                    gps_values.utc,
-                    gps_values.latitude,
-                    gps_values.longitude,
-                    gps_values.sats_used,
-                    gps_values.speed_kph,
-                    gps_values.geoidal_spe,
-                    gps_values.altitude
+                    gga_values.utc,
+                    gga_values.lat,
+                    gga_values.long,
+                    gga_values.satellites_used,
+                    gga_values.geoidal_sep,
+                    gga_values.msl_alt
                 )
                     .as_bytes(),
             )
@@ -51,11 +55,20 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
 }
 
 fn gps_checker() {
-    let _ = set_baud_rate("57600", "/dev/serial0");
-
     let port = open_port("/dev/serial0", 57600);
-    let mut gps = Gps { port, satellite_data: false, naviagtion_data: true };
-    gps.init("100");
+    let mut gps = Gps { port };
+    let nmea_output = gps.pmtk_314_api_set_nmea_output(0, 0, 0, 1, 0, 0, 1);
+    println!("GGA output only: {:?}", nmea_output);
+
+    let result = gps.init("100");
+    if result != Pmtk001Ack::Success {
+        let baud_result = set_baud_rate("57600", "/dev/serial0");
+        println!("{:?}", baud_result);
+        let result = gps.init("100");
+        println!("10Hz: {:?}", result);
+    } else {
+        println!("10Hz: {:?}", result);
+    }
 
     let stdout = stdout();
     let mut handle = stdout.lock();
@@ -63,7 +76,13 @@ fn gps_checker() {
     let mut count = 0;
     loop {
         let gps_values = gps.update();
-        handle.write_all(format!("\rGPS satellites found: {}", gps_values.sats_used).as_bytes()).unwrap();
+        let sats_found = match gps_values {
+            GpsSentence::GGA(sentence) => sentence.satellites_used,
+            GpsSentence::NoConnection => println!("GPS not connected"),
+            _ => {}
+        };
+
+        handle.write_all(format!("\rGPS satellites found: {}", sats_found).as_bytes()).unwrap();
         handle.flush().unwrap();
         thread::sleep(Duration::from_millis(100));
         count += 1;
@@ -182,21 +201,18 @@ fn main() {
     println!("Initialise servo");
     feldspar_parachute(0, vec![[2500, 500]]);
 
-
-    println!("Check Gps");
+    println!("Checking Gps");
     gps_checker();
 
     println!("Press enter to begin launch countdown.");
     let mut s = String::new();
     let _stdin = io::stdin().read_line(&mut s).unwrap();
 
-
     let gps_thread = thread::spawn(move || {
         println!("Starting gps...");
         let max_alt = feldspar_gps(recording_duration + 10, gps_file_name.as_str());
         println!("Maximum altitude: {}", max_alt);
     });
-
 
     for i in (1..11).rev() {
         println!("{}", i);
