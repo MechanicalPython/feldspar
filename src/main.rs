@@ -9,6 +9,7 @@ use adafruit_gps::gps::{Gps, open_port, GpsSentence};
 use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
+use adafruit_gps::nmea::gga::GgaData;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let port = open_port("/dev/serial0", 57600);
@@ -28,11 +29,10 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let start_time = SystemTime::now();
     while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
         let gga_values = match gps.update() {
-            GpsSentence::GGA(sentence) => {
-                sentence
-            }
-            _ => GpsSentence::NoConnection,
+            GpsSentence::GGA(sentence) => sentence,
+            _ => GgaData.default(),
         };
+
         if gga_values.msl_alt.unwrap_or(0.0) > max_alt {
             max_alt = gga_values.msl_alt.unwrap()
         }
@@ -82,7 +82,7 @@ fn gps_checker() {
                 println!("GPS not connected");
                 0
             },
-            _ => {}
+            _ => 0,
         };
 
         handle.write_all(format!("\rGPS satellites found: {}", sats_found).as_bytes()).unwrap();
