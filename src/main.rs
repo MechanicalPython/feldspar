@@ -208,7 +208,7 @@ fn main() {
     let _cam_thread = thread::spawn(move || {
         println!("Starting camera...");
         let r = feldspar_cam(vid_name.as_str());
-        println!("cam error: {:?}", str::from_utf8(r.stderr));
+        println!("cam error: {:?}", str::from_utf8(r.stderr.as_ref()));
     });
 
 
