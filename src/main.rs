@@ -7,10 +7,10 @@ use std::time::{Duration, SystemTime};
 use std::str;
 
 use adafruit_gps::gps::{Gps, open_port, GpsSentence, PortConnection};
-use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
+use adafruit_gps::nmea::gga::{GgaData, SatFix};
+
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
-use adafruit_gps::nmea::gga::{GgaData, SatFix};
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let port = open_port("/dev/serial0", 57600);
