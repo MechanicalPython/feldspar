@@ -5,7 +5,7 @@ use std::process::{Command, Output};
 use std::thread;
 use std::time::{Duration, SystemTime};
 
-use adafruit_gps::gps::{GetGpsData, Gps, open_port, GpsSentence};
+use adafruit_gps::gps::{Gps, open_port, GpsSentence};
 use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
@@ -31,15 +31,15 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
             GpsSentence::GGA(sentence) => {
                 sentence
             }
-            _ => {}
+            _ => GpsSentence::NoConnection,
         };
         if gga_values.msl_alt.unwrap_or(0.0) > max_alt {
-            max_alt = gps_values.altitude.unwrap()
+            max_alt = gga_values.msl_alt.unwrap()
         }
         gps_file
             .write_all(
                 format!(
-                    "{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
+                    "{:?},{:?},{:?},{:?},{:?},{:?}\n",
                     gga_values.utc,
                     gga_values.lat,
                     gga_values.long,
@@ -60,11 +60,11 @@ fn gps_checker() {
     let nmea_output = gps.pmtk_314_api_set_nmea_output(0, 0, 0, 1, 0, 0, 1);
     println!("GGA output only: {:?}", nmea_output);
 
-    let result = gps.init("100");
+    let result = gps.pmtk_220_set_nmea_updaterate("100");
     if result != Pmtk001Ack::Success {
         let baud_result = set_baud_rate("57600", "/dev/serial0");
         println!("{:?}", baud_result);
-        let result = gps.init("100");
+        let result = gps.pmtk_220_set_nmea_updaterate("100");
         println!("10Hz: {:?}", result);
     } else {
         println!("10Hz: {:?}", result);
@@ -78,7 +78,10 @@ fn gps_checker() {
         let gps_values = gps.update();
         let sats_found = match gps_values {
             GpsSentence::GGA(sentence) => sentence.satellites_used,
-            GpsSentence::NoConnection => println!("GPS not connected"),
+            GpsSentence::NoConnection => {
+                println!("GPS not connected");
+                0
+            },
             _ => {}
         };
 
@@ -87,7 +90,7 @@ fn gps_checker() {
         thread::sleep(Duration::from_millis(100));
         count += 1;
         if count > 5 {
-            if gps_values.sats_used > 6 {
+            if sats_found > 6 {
                 return ()
             }
             println!("\nPress enter to continue the search. Press c to cancel search and continue.");
