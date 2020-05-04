@@ -9,7 +9,7 @@ use adafruit_gps::gps::{Gps, open_port, GpsSentence};
 use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
-use adafruit_gps::nmea::gga::GgaData;
+use adafruit_gps::nmea::gga::{GgaData, SatFix};
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let port = open_port("/dev/serial0", 57600);
@@ -30,7 +30,17 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
         let gga_values = match gps.update() {
             GpsSentence::GGA(sentence) => sentence,
-            _ => GgaData::default(),
+            _ => GgaData{
+                utc: 0.0,
+                lat: None,
+                long: None,
+                sat_fix: SatFix::NoFix,
+                satellites_used: 0,
+                hdop: None,
+                msl_alt: None,
+                geoidal_sep: None,
+                age_diff_corr: None
+            },
         };
 
         if gga_values.msl_alt.unwrap_or(0.0) > max_alt {
