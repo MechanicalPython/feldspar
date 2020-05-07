@@ -256,6 +256,6 @@ fn main() {
 
     gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
-    Command::new("^C").output().unwrap();
+    Command::new("\x03").output().unwrap();
     cam_thread.join().unwrap();
 }
