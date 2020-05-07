@@ -1,7 +1,7 @@
 use std::fs::OpenOptions;
 use std::io::{self, Write, stdout};
 use std::path::Path;
-use std::process::{Command, Output};
+use std::process::{Command, Output, Stdio};
 use std::thread;
 use std::time::{Duration, SystemTime};
 use std::str;
@@ -12,6 +12,7 @@ use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
 
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
+use std::any::Any;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let port = open_port("/dev/serial0", 57600);
@@ -215,12 +216,11 @@ fn main() {
     println!("Total rocket flight time is {}", recording_duration);
     println!("Parachute deploy in {} seconds after launch", deploy_delay);
 
-    let _cam_thread = thread::spawn(move || {
-        println!("Starting camera...");
-        let r = feldspar_cam(vid_name.as_str());
-        println!("cam error: {:?}", str::from_utf8(r.stderr.as_ref()));
-    });
-
+    let mut cam = Command::new("raspivid")
+        .arg("-o")
+        .arg(vid_file)
+        .arg("-t")
+        .arg("0").stdin(Stdio::piped()).spawn().unwrap();
 
     println!("Initialise servo");
     feldspar_parachute(0, vec![[500, 500]]);
@@ -255,4 +255,5 @@ fn main() {
 
     gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
+    cam.kill().unwrap();
 }
