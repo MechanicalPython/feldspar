@@ -1,7 +1,7 @@
 use std::fs::OpenOptions;
 use std::io::{self, Write, stdout};
 use std::path::Path;
-use std::process::{Command, Output, Stdio};
+use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, SystemTime};
 use std::str;
@@ -12,7 +12,6 @@ use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
 
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
-use std::any::Any;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let port = open_port("/dev/serial0", 57600);
