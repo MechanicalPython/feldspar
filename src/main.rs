@@ -6,55 +6,53 @@ use std::process::{Command, Output};
 use std::thread;
 use std::time::{Duration, SystemTime};
 
-use adafruit_gps::gps::{GetGpsData, Gps, open_port};
+use adafruit_gps::gps::{GetGpsData, Gps, GpsSentence, open_port};
 use adafruit_gps::PMTK::send_pmtk::set_baud_rate;
 use rppal::gpio::{Gpio, OutputPin};
 
-fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
-    let port = open_port("/dev/serial0", 57600);
-    let mut gps = Gps { port, satellite_data: false, naviagtion_data: true };
+fn feldspar_gps(file_name: &str) -> f32 {
+    let mut gps_file = OpenOptions::new().write(true).create_new(true).open(file_name)
+        .expect("File already exists. Try a different name.");
 
-    let _file = OpenOptions::new().write(true).create_new(true).open(file_name);
+    let port = open_port("/dev/serial0", 9600);
+    let mut gps = Gps { port };
+    gps.pmtk_220_set_nmea_updaterate("100");
 
-    let mut gps_file = OpenOptions::new().append(true).open(file_name).expect("cannot open file");
+    let stdout = stdout();
+    let mut handle = stdout.lock();
+
 
     let mut max_alt: f32 = 0.0;
 
     let mut cont = true;
     while cont {
-        let gps_values = gps.update();
+        let sentence = gps.update();
+        match sentence {
+            GpsSentence::GGA(gga_data) => {
+                gps_file
+                    .write(
+                        format!(
+                            "{:?},{:?},{:?},{:?},{:?},{:?}\n",
+                            gga_data.utc,
+                            gga_data.lat.unwrap_or(),
+                            gga_data.long,
+                            gga_data.satellites_used,
+                            gga_data.geoidal_sep,
+                            gga_data.msl_alt,
+                        )
+                            .as_bytes(),
+                    )
+            }
+            _ => {}
+        }
         if gps_values.altitude.unwrap_or(0.0) > max_alt {
             max_alt = gps_values.altitude.unwrap()
         }
-        gps_file
-            .write_all(
-                format!(
-                    "{:?},{:?},{:?},{:?},{:?},{:?},{:?}\n",
-                    gps_values.utc,
-                    gps_values.latitude,
-                    gps_values.longitude,
-                    gps_values.sats_used,
-                    gps_values.speed_kph,
-                    gps_values.geoidal_spe,
-                    gps_values.altitude
-                )
-                    .as_bytes(),
-            )
-            .expect("Failed to write line");
     }
     return max_alt;
 }
 
-fn gps_checker() {
-    let _ = set_baud_rate("57600", "/dev/serial0");
-
-    let port = open_port("/dev/serial0", 57600);
-    let mut gps = Gps { port, satellite_data: false, naviagtion_data: true };
-    gps.init("100");
-
-    let stdout = stdout();
-    let mut handle = stdout.lock();
-
+fn gps_find_() {
     let mut count = 0;
     loop {
         let gps_values = gps.update();
