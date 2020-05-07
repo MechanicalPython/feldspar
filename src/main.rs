@@ -13,7 +13,7 @@ use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
-    let port = open_port("/dev/serial0", 9600);
+    let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
 
     let _file = OpenOptions::new()
@@ -66,7 +66,7 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
 }
 
 fn gps_checker() {
-    let port = open_port("/dev/serial0", 9600);
+    let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
 
     if gps.update() == GpsSentence::NoConnection {
