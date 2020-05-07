@@ -13,7 +13,7 @@ use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
-    let port = open_port("/dev/serial0", 57600);
+    let port = open_port("/dev/serial0", 9600);
     let mut gps = Gps { port };
 
     let _file = OpenOptions::new()
@@ -212,7 +212,7 @@ fn main() {
 
 
     println!("Initialise servo");
-    feldspar_parachute(0, vec![[2500, 500]]);
+    feldspar_parachute(0, vec![[500, 500]]);
 
     println!("Checking Gps");
     gps_checker();
@@ -233,7 +233,7 @@ fn main() {
     }
     println!("Launch!");
     let parachute_thread = thread::spawn(move || {
-        feldspar_parachute(deploy_delay, vec![[500, 1000], [2500, 500]]);
+        feldspar_parachute(deploy_delay, vec![[2500, 1000], [500, 500]]);
         println!("Deployed!");
     });
 
