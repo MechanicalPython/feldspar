@@ -215,7 +215,7 @@ fn main() {
     println!("Total rocket flight time is {}", recording_duration);
     println!("Parachute deploy in {} seconds after launch", deploy_delay);
 
-    let _cam_thread = thread::spawn(move || {
+    let cam_thread = thread::spawn(move || {
         println!("Starting camera...");
         let r = feldspar_cam(vid_name.as_str());
         println!("cam error: {:?}", str::from_utf8(r.stderr.as_ref()));
@@ -253,6 +253,7 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
 
+    cam_thread.join().unwrap();
     gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
 }
