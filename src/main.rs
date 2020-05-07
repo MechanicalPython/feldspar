@@ -131,7 +131,7 @@ fn feldspar_cam(vid_file: &str) -> Output {
         .arg("-o")
         .arg(vid_file)
         .arg("-t")
-        .arg("0")
+        .arg("3600")
         .output()
         .expect("Camera failed to open.");
     return c
@@ -253,6 +253,7 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
 
+    _cam_thread.join().unpark();
     gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
 }
