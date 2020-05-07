@@ -253,7 +253,9 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
 
-    cam_thread.join().unwrap();
+
     gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
+    Command::new("^C").output().unwrap();
+    cam_thread.join().unwrap();
 }
