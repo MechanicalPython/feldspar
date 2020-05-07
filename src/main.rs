@@ -253,7 +253,7 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
 
-    _cam_thread.join().unpark();
+    _cam_thread.join().unwrap();
     gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
 }
