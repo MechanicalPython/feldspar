@@ -12,7 +12,7 @@ fn main() {
         match gps_values {
             GpsSentence::GGA(sentence) => {
                 println!(
-                    "{:?},{:?},{:?},{:?},{:?},{:?}\n",
+                    "{:?},{:?},{:?},{:?},{:?}\n",
                     sentence.utc,
                     sentence.lat,
                     sentence.long,
