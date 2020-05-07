@@ -218,7 +218,7 @@ fn main() {
 
     let mut cam = Command::new("raspivid")
         .arg("-o")
-        .arg(vid_file)
+        .arg(vid_name)
         .arg("-t")
         .arg("0").stdin(Stdio::piped()).spawn().unwrap();
 
