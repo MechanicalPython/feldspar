@@ -131,7 +131,7 @@ fn feldspar_cam(vid_file: &str) -> Output {
         .arg("-o")
         .arg(vid_file)
         .arg("-t")
-        .arg("360000")
+        .arg("3600000")
         .output()
         .expect("Camera failed to open.");
     return c
