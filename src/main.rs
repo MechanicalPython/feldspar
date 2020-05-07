@@ -8,6 +8,7 @@ use std::str;
 
 use adafruit_gps::gps::{Gps, open_port, GpsSentence};
 use adafruit_gps::nmea::gga::{GgaData, SatFix};
+use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
 
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
@@ -69,16 +70,26 @@ fn gps_checker() {
     let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
 
-    if gps.update() == GpsSentence::NoConnection {
-        println!("GPS not connected");
-        return ()
-    }
+    match gps.update() {
+        GpsSentence::NoConnection => {println!("GPS not connected"); ()},
+        GpsSentence::InvalidBytes => {
+            println!("GPS baud rate not correct");
+            set_baud_rate("57600", "/dev/serial0");
+        },
+        _ => {}
+    };
 
     let nmea_output = gps.pmtk_314_api_set_nmea_output(0, 0, 0, 1, 0, 0, 1);
     println!("GGA output only: {:?}", nmea_output);
 
-    let result = gps.pmtk_220_set_nmea_updaterate("100");
-    println!("10Hz: {:?}", result);
+    let valid_hz = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "1000"];
+    for hz in valid_hz.iter() {
+        let result = gps.pmtk_220_set_nmea_updaterate(hz);
+        println!("{}Hz: {:?}", (1000/hz.parse().unwrap()), result);
+        if result == Pmtk001Ack::Success{
+            break
+        }
+    }
 
     let stdout = stdout();
     let mut handle = stdout.lock();
