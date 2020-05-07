@@ -127,17 +127,6 @@ fn gps_checker() {
     }
 }
 
-fn feldspar_cam(vid_file: &str) -> Output {
-    let c = Command::new("raspivid")
-        .arg("-o")
-        .arg(vid_file)
-        .arg("-t")
-        .arg("0")
-        .output()
-        .expect("Camera failed to open.");
-    return c
-}
-
 /// Servo motor has a period of 50Hz (20ms).
 /// The position is tied to the pulse width. So a 1.5ms pulse over a 20ms duration is position 0.
 /// Opposite the wire input is the 'top' of the servo: 0 degrees.
