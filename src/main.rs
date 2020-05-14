@@ -14,6 +14,10 @@ use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
+    // todo - better data processing. No Some(), just the number or a None,None, etc line.
+    // todo - Include error, especially vdop.
+    // todo - test the GPS for accuracy over time for long, lat and height.
+
     let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
 
