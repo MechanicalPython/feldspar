@@ -7,7 +7,6 @@ use std::time::{Duration, SystemTime};
 use std::str;
 
 use adafruit_gps::gps::{Gps, open_port, GpsSentence};
-use adafruit_gps::nmea::gga::{GgaData, SatFix};
 use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
 
 use clap::{App, Arg};
@@ -56,13 +55,13 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
         }
 
         if altitude.unwrap_or(0.0) > max_alt {
-            max_alt = gga_values.msl_alt.unwrap()
+            max_alt = altitude.unwrap()
         }
 
         if latitude.is_some() && longitude.is_some() && altitude.is_some() && vdop.is_some() &&
             hdop.is_some() && pdop.is_some() {
             gps_file.write_all(format!("{},{},{},{},{},{},{}",
-                                       utc.unwrap(), latitude.unwrap(), longitude.unwrap(), altitude.unwrap(),
+                                       utc, latitude.unwrap(), longitude.unwrap(), altitude.unwrap(),
                                        vdop.unwrap(), hdop.unwrap(), pdop.unwrap())
                 .as_bytes())
                 .unwrap_or(());
