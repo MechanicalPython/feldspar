@@ -36,7 +36,6 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
         let mut vdop = None;
         let mut hdop = None;
         let mut pdop = None;
-        let mut satellites = 0;
 
         match gps.update() {
             GpsSentence::GGA(sentence) => {
@@ -44,7 +43,6 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
                 latitude = sentence.lat;
                 longitude = sentence.long;
                 altitude = sentence.msl_alt;
-                satellites = sentence.satellites_used;
             },
             GpsSentence::GSA(sentence) => {
                 vdop = sentence.vdop;
