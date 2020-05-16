@@ -91,7 +91,7 @@ fn gps_checker() {
     let valid_hz = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "1000"];
     for hz in valid_hz.iter() {
         let result = gps.pmtk_220_set_nmea_updaterate(hz);
-        println!("{}Hz: {:?}", (1000/hz.parse::<i32>().unwrap()), result);
+        println!("{}Hz: {:?}", (1000_f32/hz.parse::<f32>().unwrap()), result);
         if result == Pmtk001Ack::Success{
             break
         }
