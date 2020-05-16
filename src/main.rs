@@ -58,13 +58,13 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
 
         if latitude.is_some() && longitude.is_some() && altitude.is_some() && vdop.is_some() &&
             hdop.is_some() && pdop.is_some() {
-            gps_file.write_all(format!("{},{},{},{},{},{},{}",
+            gps_file.write_all(format!("{},{},{},{},{},{},{}\n",
                                        utc, latitude.unwrap(), longitude.unwrap(), altitude.unwrap(),
                                        vdop.unwrap(), hdop.unwrap(), pdop.unwrap())
                 .as_bytes())
                 .unwrap_or(());
         } else {
-            gps_file.write_all(format!("None,None,None,None,None,None,None")
+            gps_file.write_all(format!("None,None,None,None,None,None,None\n")
                 .as_bytes())
                 .unwrap_or(());
         }
