@@ -14,10 +14,6 @@ use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
 fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
-    // todo - better data processing. No Some(), just the number or a None,None, etc line.
-    // todo - Include error, especially vdop.
-    // todo - test the GPS for accuracy over time for long, lat and height.
-
     let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
 
@@ -34,38 +30,47 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
     let mut max_alt: f32 = 0.0;
     let start_time = SystemTime::now();
     while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
-        let gga_values = match gps.update() {
-            GpsSentence::GGA(sentence) => sentence,
-            _ => GgaData{
-                utc: 0.0,
-                lat: None,
-                long: None,
-                sat_fix: SatFix::NoFix,
-                satellites_used: 0,
-                hdop: None,
-                msl_alt: None,
-                geoidal_sep: None,
-                age_diff_corr: None
-            },
-        };
+        let mut utc: f64 = 0.0;
+        let mut latitude = None;
+        let mut longitude = None;
+        let mut altitude = None;
+        let mut vdop = None;
+        let mut hdop = None;
+        let mut pdop = None;
+        let mut satellites = 0;
 
-        if gga_values.msl_alt.unwrap_or(0.0) > max_alt {
+        match gps.update() {
+            GpsSentence::GGA(sentence) => {
+                utc = sentence.utc;
+                latitude = sentence.lat;
+                longitude = sentence.long;
+                altitude = sentence.msl_alt;
+                satellites = sentence.satellites_used;
+            },
+            GpsSentence::GSA(sentence) => {
+                vdop = sentence.vdop;
+                hdop = sentence.hdop;
+                pdop = sentence.pdop;
+            },
+            _ => {},
+        }
+
+        if altitude.unwrap_or(0.0) > max_alt {
             max_alt = gga_values.msl_alt.unwrap()
         }
-        gps_file
-            .write_all(
-                format!(
-                    "{:?},{:?},{:?},{:?},{:?},{:?}\n",
-                    gga_values.utc,
-                    gga_values.lat,
-                    gga_values.long,
-                    gga_values.satellites_used,
-                    gga_values.geoidal_sep,
-                    gga_values.msl_alt
-                )
-                    .as_bytes(),
-            )
-            .expect("Failed to write line");
+
+        if latitude.is_some() && longitude.is_some() && altitude.is_some() && vdop.is_some() &&
+            hdop.is_some() && pdop.is_some() {
+            gps_file.write_all(format!("{},{},{},{},{},{},{}",
+                                       latitude.unwrap(), longitude.unwrap(), altitude.unwrap(),
+                                       vdop.unwrap(), hdop.unwrap(), pdop.unwrap())
+                .as_bytes())
+                .unwrap_or(());
+        } else {
+            gps_file.write_all(format!("None,None,None,None,None,None,None")
+                .as_bytes())
+                .unwrap_or(());
+        }
     }
     return max_alt;
 }
