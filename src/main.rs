@@ -27,8 +27,8 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
         .expect("cannot open file");
 
     let mut max_alt: f32 = 0.0;
-    let start_time = SystemTime::now();
-    while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
+    // let start_time = SystemTime::now();
+    loop {
         let mut utc: f64 = 0.0;
         let mut latitude = None;
         let mut longitude = None;
@@ -247,7 +247,8 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
 
-    gps_thread.join().unwrap();
+    // gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
     cam.kill().unwrap();
+
 }
