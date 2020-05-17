@@ -1,18 +1,19 @@
 use std::fs::OpenOptions;
-use std::io::{self, Write, stdout};
+use std::io::{self, stdout, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
+use std::str;
+use std::sync::mpsc;
+use std::sync::mpsc::Receiver;
 use std::thread;
 use std::time::{Duration, SystemTime};
-use std::str;
 
-use adafruit_gps::gps::{Gps, open_port, GpsSentence};
-use adafruit_gps::PMTK::send_pmtk::{set_baud_rate, Pmtk001Ack};
-
+use adafruit_gps::gps::{Gps, GpsSentence, open_port};
+use adafruit_gps::PMTK::send_pmtk::{Pmtk001Ack, set_baud_rate};
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
-fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
+fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
     let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
 
@@ -27,8 +28,7 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
         .expect("cannot open file");
 
     let mut max_alt: f32 = 0.0;
-    let start_time = SystemTime::now();
-    while start_time.elapsed().unwrap() < Duration::from_secs(capture_duration) {
+    loop {
         let mut utc: f64 = 0.0;
         let mut latitude = None;
         let mut longitude = None;
@@ -43,13 +43,13 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
                 latitude = sentence.lat;
                 longitude = sentence.long;
                 altitude = sentence.msl_alt;
-            },
+            }
             GpsSentence::GSA(sentence) => {
                 vdop = sentence.vdop;
                 hdop = sentence.hdop;
                 pdop = sentence.pdop;
-            },
-            _ => {},
+            }
+            _ => {}
         }
 
         if altitude.unwrap_or(0.0) > max_alt {
@@ -68,6 +68,10 @@ fn feldspar_gps(capture_duration: u64, file_name: &str) -> f32 {
                 .as_bytes())
                 .unwrap_or(());
         }
+
+        if rx.try_recv().unwrap_or(false) {
+            break;
+        }
     }
     return max_alt;
 }
@@ -77,11 +81,14 @@ fn gps_checker() {
     let mut gps = Gps { port };
 
     match gps.update() {
-        GpsSentence::NoConnection => {println!("GPS not connected"); ()},
+        GpsSentence::NoConnection => {
+            println!("GPS not connected");
+            ()
+        }
         GpsSentence::InvalidBytes => {
             println!("GPS baud rate not correct");
             set_baud_rate("57600", "/dev/serial0");
-        },
+        }
         _ => {}
     };
 
@@ -91,9 +98,9 @@ fn gps_checker() {
     let valid_hz = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "1000"];
     for hz in valid_hz.iter() {
         let result = gps.pmtk_220_set_nmea_updaterate(hz);
-        println!("{}Hz: {:?}", (1000_f32/hz.parse::<f32>().unwrap()), result);
-        if result == Pmtk001Ack::Success{
-            break
+        println!("{}Hz: {:?}", (1000_f32 / hz.parse::<f32>().unwrap()), result);
+        if result == Pmtk001Ack::Success {
+            break;
         }
     }
 
@@ -108,7 +115,7 @@ fn gps_checker() {
             GpsSentence::NoConnection => {
                 println!("GPS not connected");
                 0
-            },
+            }
             _ => 0,
         };
 
@@ -118,13 +125,13 @@ fn gps_checker() {
         count += 1;
         if count > 5 {
             if sats_found > 6 {
-                return ()
+                return ();
             }
             println!("\nPress enter to continue the search. Press c to cancel search and continue.");
             let mut s = String::new();
             io::stdin().read_line(&mut s).unwrap();
             if s.trim() == "c".to_string() {
-                return ()
+                return ();
             } else {
                 count = 0;
             }
@@ -148,7 +155,7 @@ fn feldspar_parachute(seconds_to_wait: u64, cmds: Vec<[u64; 2]>) {
     let pin_num = 23; // BCM pin 23 is physical pin 16
     let mut pin = Gpio::new().unwrap().get(pin_num).unwrap().into_output();
 
-    for i in (1..seconds_to_wait+1).rev() {
+    for i in (1..seconds_to_wait + 1).rev() {
         println!("Deploy in {}", i);
         thread::sleep(Duration::from_secs(1));
     }
@@ -222,15 +229,17 @@ fn main() {
     println!("Checking Gps");
     gps_checker();
 
+    let (gps_tx, gps_rx) = mpsc::channel();
+    let _gps_thread = thread::spawn(move || {
+        println!("Starting gps...");
+        let max_alt = feldspar_gps(gps_file_name.as_str(), gps_rx);
+        println!("Maximum altitude: {}", max_alt);
+    });
+
     println!("Press enter to begin launch countdown.");
     let mut s = String::new();
     let _stdin = io::stdin().read_line(&mut s).unwrap();
 
-    let gps_thread = thread::spawn(move || {
-        println!("Starting gps...");
-        let max_alt = feldspar_gps(recording_duration + 10, gps_file_name.as_str());
-        println!("Maximum altitude: {}", max_alt);
-    });
 
     for i in (1..11).rev() {
         println!("{}", i);
@@ -243,11 +252,11 @@ fn main() {
     });
 
     for i in 1..recording_duration {
-        println!("-{}",i);
+        println!("-{}", i);
         thread::sleep(Duration::from_secs(1));
     }
 
-    gps_thread.join().unwrap();
     parachute_thread.join().unwrap();
     cam.kill().unwrap();
+    let _ = gps_tx.send(true);
 }
