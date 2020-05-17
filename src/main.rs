@@ -219,19 +219,18 @@ fn main() {
     println!("Initialise servo");
     feldspar_parachute(0, vec![[500, 500]]);
 
-    println!("Checking Gps");
-    gps_checker();
+    let (gps_tx, gps_rx) = mpsc::channel();
+    let _gps_thread = thread::spawn(move || {
+        println!("Starting gps...");
+        let max_alt = feldspar_gps(gps_file_name.as_str(), gps_rx);
+        println!("Maximum altitude: {}", max_alt);
+    });
 
     println!("Press enter to begin launch countdown.");
     let mut s = String::new();
     let _stdin = io::stdin().read_line(&mut s).unwrap();
 
-    let (gps_tx, gps_rx) = mpsc::channel();
-    let gps_thread = thread::spawn(move || {
-        println!("Starting gps...");
-        let max_alt = feldspar_gps(gps_file_name.as_str(), gps_rx);
-        println!("Maximum altitude: {}", max_alt);
-    });
+
 
     for i in (1..11).rev() {
         println!("{}", i);
