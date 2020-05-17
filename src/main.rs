@@ -31,7 +31,7 @@ fn feldspar_gps(file_name: &str, rx:Receiver<bool>) -> f32 {
 
     // todo - testing showed that this is not sending properly. NoPacket received: invalid string given.
     let nmea_output = gps.pmtk_314_api_set_nmea_output(0, 0, 0, 1, 1, 0, 1);
-    println!("Output: {:?}", nmea_output);
+    println!("Sentence output: {:?}", nmea_output);
 
     let valid_hz = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "1000"];
     for hz in valid_hz.iter() {
@@ -42,6 +42,7 @@ fn feldspar_gps(file_name: &str, rx:Receiver<bool>) -> f32 {
         }
     }
 
+    // Search for satellites.
     let stdout = stdout();
     let mut handle = stdout.lock();
 
@@ -51,7 +52,7 @@ fn feldspar_gps(file_name: &str, rx:Receiver<bool>) -> f32 {
         let sats_found = match gps_values {
             GpsSentence::GGA(sentence) => sentence.satellites_used,
             GpsSentence::NoConnection => {
-                println!("GPS not connected");
+                println!("GPS not connected\n");
                 0
             }
             _ => 0,
@@ -108,10 +109,12 @@ fn feldspar_gps(file_name: &str, rx:Receiver<bool>) -> f32 {
             _ => {}
         }
 
+        // Adjust max altitude
         if altitude.unwrap_or(0.0) > max_alt {
             max_alt = altitude.unwrap()
         }
 
+        // Write gps data to file
         if latitude.is_some() && longitude.is_some() && altitude.is_some() && vdop.is_some() &&
             hdop.is_some() && pdop.is_some() {
             gps_file.write_all(format!("{},{},{},{},{},{},{}\n",
@@ -124,7 +127,9 @@ fn feldspar_gps(file_name: &str, rx:Receiver<bool>) -> f32 {
                 .as_bytes())
                 .unwrap_or(());
         }
-        if rx.try_recv().unwrap() == true {
+
+        // Check if process needs to be killed and return max alt.
+        if rx.try_recv().unwrap_or(false) {
             println!("Terminating gps");
             break
         }
