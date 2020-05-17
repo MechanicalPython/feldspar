@@ -9,7 +9,7 @@ use std::thread;
 use std::time::Duration;
 
 use adafruit_gps::gps::{Gps, GpsSentence, open_port};
-use adafruit_gps::PMTK::send_pmtk::{Pmtk001Ack, set_baud_rate};
+use adafruit_gps::PMTK::send_pmtk::Pmtk001Ack;
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
@@ -33,6 +33,8 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
         let mut hdop = None;
         let mut pdop = None;
 
+        // todo - the update here doesn't work as well with two sentences. Each time two are ignored.
+        // can have more than on sentence, one for GPS, GLONAS and GALILEO.
         match gps.update() {
             GpsSentence::GGA(sentence) => {
                 utc = sentence.utc;
@@ -52,18 +54,19 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
             max_alt = altitude.unwrap()
         }
 
-        if latitude.is_some() && longitude.is_some() && altitude.is_some() && vdop.is_some() &&
-            hdop.is_some() && pdop.is_some() {
-            gps_file.write_all(format!("{},{},{},{},{},{},{}\n",
-                                       utc, latitude.unwrap(), longitude.unwrap(), altitude.unwrap(),
-                                       vdop.unwrap(), hdop.unwrap(), pdop.unwrap())
-                .as_bytes())
-                .unwrap_or(());
-        } else {
-            gps_file.write_all(format!("{},None,None,None,None,None,None\n", utc)
-                .as_bytes())
-                .unwrap_or(());
-        }
+        // if latitude.is_some() && longitude.is_some() && altitude.is_some() && vdop.is_some() &&
+        //     hdop.is_some() && pdop.is_some() {
+        gps_file.write_all(format!("{},{},{},{},{},{},{}\n",
+                                   utc, latitude.unwrap_or_default(), longitude.unwrap_or_default(),
+                                   altitude.unwrap_or_default(), vdop.unwrap_or_default(),
+                                   hdop.unwrap_or_default(), pdop.unwrap_or_default())
+            .as_bytes())
+            .unwrap_or(());
+        // } else {
+        //     gps_file.write_all(format!("{},None,None,None,None,None,None\n", utc)
+        //         .as_bytes())
+        //         .unwrap_or(());
+        // }
 
         if rx.try_recv().unwrap_or(false) {
             break;
@@ -73,7 +76,6 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
 }
 
 fn gps_checker() {
-
     let port = open_port("/dev/serial0", 9600);
     let mut gps = Gps { port };
     match gps.update() {
