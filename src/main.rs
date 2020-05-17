@@ -9,12 +9,12 @@ use std::thread;
 use std::time::Duration;
 
 use adafruit_gps::gps::{Gps, GpsSentence, open_port};
-use adafruit_gps::PMTK::send_pmtk::Pmtk001Ack;
+use adafruit_gps::PMTK::send_pmtk::{Pmtk001Ack, set_baud_rate};
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
 fn feldspar_gps(file_name: &str, rx: Receiver<bool>) {
-    let port = open_port("/dev/serial0", 9600);
+    let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
 
     let mut gps_file = OpenOptions::new()
@@ -67,7 +67,9 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) {
 }
 
 fn gps_checker() {
-    let port = open_port("/dev/serial0", 9600);
+    set_baud_rate("57600", "/dev/serial0");
+
+    let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
     match gps.update() {
         GpsSentence::NoConnection => {
@@ -215,7 +217,7 @@ fn main() {
 
     println!("\nStarting gps...");
     let (gps_tx, gps_rx) = mpsc::channel();
-    let _gps_thread = thread::spawn(move || {
+    let gps_thread = thread::spawn(move || {
         feldspar_gps(gps_file_name.as_str(), gps_rx);
     });
 
@@ -242,4 +244,5 @@ fn main() {
     parachute_thread.join().unwrap();
     cam.kill().unwrap();
     let _ = gps_tx.send(true);
+    gps_thread.join().unwrap();
 }
