@@ -24,49 +24,38 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
         .expect("File already exits.");
 
     let mut max_alt: f32 = 0.0;
+    let mut utc: f64 = 0.0;
     loop {
-        let mut utc: f64 = 0.0;
-        let mut latitude = None;
-        let mut longitude = None;
-        let mut altitude = None;
-        let mut vdop = None;
-        let mut hdop = None;
-        let mut pdop = None;
-
-        // todo - the update here doesn't work as well with two sentences. Each time two are ignored.
-        // can have more than on sentence, one for GPS, GLONAS and GALILEO.
+        // Write each sentence in its own line and then parse it afterwards.
         match gps.update() {
             GpsSentence::GGA(sentence) => {
                 utc = sentence.utc;
-                latitude = sentence.lat;
-                longitude = sentence.long;
-                altitude = sentence.msl_alt;
+                let latitude = sentence.lat;
+                let longitude = sentence.long;
+                let altitude = sentence.msl_alt;
+                if altitude.unwrap_or(0.0) > max_alt {
+                    max_alt = altitude.unwrap()
+                }
+                gps_file.write_all(format!("GGA,{},{},{},{}",
+                                           utc,
+                                           latitude.unwrap_or(0.0),
+                                           longitude.unwrap_or(0.0),
+                                           altitude.unwrap_or(0.0)
+                ).as_bytes()).unwrap_or(());
             }
             GpsSentence::GSA(sentence) => {
-                vdop = sentence.vdop;
-                hdop = sentence.hdop;
-                pdop = sentence.pdop;
+                let vdop = sentence.vdop;
+                let hdop = sentence.hdop;
+                let pdop = sentence.pdop;
+                gps_file.write_all(format!("GSA,{},{},{},{}",
+                                           utc,
+                                           vdop.unwrap_or(0.0),
+                                           hdop.unwrap_or(0.0),
+                                           pdop.unwrap_or(0.0)
+                ).as_bytes()).unwrap_or(());
             }
             _ => {}
         }
-
-        if altitude.unwrap_or(0.0) > max_alt {
-            max_alt = altitude.unwrap()
-        }
-
-        // if latitude.is_some() && longitude.is_some() && altitude.is_some() && vdop.is_some() &&
-        //     hdop.is_some() && pdop.is_some() {
-        gps_file.write_all(format!("{},{},{},{},{},{},{}\n",
-                                   utc, latitude.unwrap_or_default(), longitude.unwrap_or_default(),
-                                   altitude.unwrap_or_default(), vdop.unwrap_or_default(),
-                                   hdop.unwrap_or_default(), pdop.unwrap_or_default())
-            .as_bytes())
-            .unwrap_or(());
-        // } else {
-        //     gps_file.write_all(format!("{},None,None,None,None,None,None\n", utc)
-        //         .as_bytes())
-        //         .unwrap_or(());
-        // }
 
         if rx.try_recv().unwrap_or(false) {
             break;
@@ -112,7 +101,7 @@ fn gps_checker() {
                 println!("GPS not connected");
                 0
             }
-            _ => 0,
+            _ => {}
         };
 
         handle.write_all(format!("\rGPS satellites found: {}", sats_found).as_bytes()).unwrap();
