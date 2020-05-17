@@ -14,17 +14,17 @@ use rppal::gpio::Gpio;
 use std::sync::mpsc::Receiver;
 
 fn feldspar_gps(file_name: &str, rx:Receiver<bool>) -> f32 {
+    set_baud_rate("57600", "/dev/serial0");
+
     let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
 
     match gps.update() {
         GpsSentence::NoConnection => {
-            println!("GPS not connected");
-            ()
+            panic!("GPS not connected");
         }
         GpsSentence::InvalidBytes => {
-            println!("GPS baud rate not correct");
-            set_baud_rate("57600", "/dev/serial0");
+            panic!("GPS baud rate not correct")
         }
         _ => { println!("GPS baud rate is correct.") }
     };
