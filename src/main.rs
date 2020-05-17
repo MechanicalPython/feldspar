@@ -6,7 +6,7 @@ use std::str;
 use std::sync::mpsc;
 use std::sync::mpsc::Receiver;
 use std::thread;
-use std::time::{Duration};
+use std::time::Duration;
 
 use adafruit_gps::gps::{Gps, GpsSentence, open_port};
 use adafruit_gps::PMTK::send_pmtk::{Pmtk001Ack, set_baud_rate};
@@ -14,7 +14,7 @@ use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
 fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
-    let port = open_port("/dev/serial0", 57600);
+    let port = open_port("/dev/serial0", 9600);
     let mut gps = Gps { port };
 
     let mut gps_file = OpenOptions::new()
@@ -73,17 +73,15 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
 }
 
 fn gps_checker() {
-    let port = open_port("/dev/serial0", 57600);
-    let mut gps = Gps { port };
 
+    let port = open_port("/dev/serial0", 9600);
+    let mut gps = Gps { port };
     match gps.update() {
         GpsSentence::NoConnection => {
             println!("GPS not connected");
-            ()
         }
         GpsSentence::InvalidBytes => {
             println!("GPS baud rate not correct");
-            set_baud_rate("57600", "/dev/serial0");
         }
         _ => {}
     };
@@ -91,7 +89,7 @@ fn gps_checker() {
     let nmea_output = gps.pmtk_314_api_set_nmea_output(0, 0, 0, 1, 0, 0, 1);
     println!("GGA output only: {:?}", nmea_output);
 
-    let valid_hz = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "1000"];
+    let valid_hz = ["100", "200", "400", "500", "1000"];
     for hz in valid_hz.iter() {
         let result = gps.pmtk_220_set_nmea_updaterate(hz);
         println!("{}Hz: {:?}", (1000_f32 / hz.parse::<f32>().unwrap()), result);
