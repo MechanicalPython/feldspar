@@ -92,34 +92,32 @@ fn gps_checker() {
     let stdout = stdout();
     let mut handle = stdout.lock();
 
-    let mut count = 0;
+    let mut sats_found = 0;
     loop {
         let gps_values = gps.update();
-        let sats_found = match gps_values {
-            GpsSentence::GGA(sentence) => sentence.satellites_used,
+
+        match gps_values {
+            GpsSentence::GGA(sentence) => {
+                sats_found = sentence.satellites_used;
+                count += 1;
+            }
             GpsSentence::NoConnection => {
                 println!("GPS not connected");
-                0
             }
             _ => {}
         };
 
         handle.write_all(format!("\rGPS satellites found: {}", sats_found).as_bytes()).unwrap();
         handle.flush().unwrap();
-        thread::sleep(Duration::from_millis(100));
-        count += 1;
-        if count > 5 {
-            if sats_found > 6 {
-                return ();
-            }
-            println!("\nPress enter to continue the search. Press c to cancel search and continue.");
-            let mut s = String::new();
-            io::stdin().read_line(&mut s).unwrap();
-            if s.trim() == "c".to_string() {
-                return ();
-            } else {
-                count = 0;
-            }
+
+        if sats_found > 6 {
+            return ();
+        }
+        println!("\nPress enter to continue the search. Press c to cancel search and continue.");
+        let mut s = String::new();
+        io::stdin().read_line(&mut s).unwrap();
+        if s.trim() == "c".to_string() {
+            return ();
         }
     }
 }
