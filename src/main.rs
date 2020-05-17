@@ -99,7 +99,6 @@ fn gps_checker() {
         match gps_values {
             GpsSentence::GGA(sentence) => {
                 sats_found = sentence.satellites_used;
-                count += 1;
             }
             GpsSentence::NoConnection => {
                 println!("GPS not connected");
