@@ -6,7 +6,7 @@ use std::str;
 use std::sync::mpsc;
 use std::sync::mpsc::Receiver;
 use std::thread;
-use std::time::{Duration, SystemTime};
+use std::time::{Duration};
 
 use adafruit_gps::gps::{Gps, GpsSentence, open_port};
 use adafruit_gps::PMTK::send_pmtk::{Pmtk001Ack, set_baud_rate};
@@ -17,15 +17,11 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
     let port = open_port("/dev/serial0", 57600);
     let mut gps = Gps { port };
 
-    let _file = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(file_name);
-
     let mut gps_file = OpenOptions::new()
+        .create_new(true)
         .append(true)
-        .open(file_name) // fails if no file.
-        .expect("cannot open file");
+        .open(file_name)
+        .expect("File already exits.");
 
     let mut max_alt: f32 = 0.0;
     loop {
@@ -64,7 +60,7 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
                 .as_bytes())
                 .unwrap_or(());
         } else {
-            gps_file.write_all(format!("None,None,None,None,None,None,None\n")
+            gps_file.write_all(format!("{},None,None,None,None,None,None\n", utc)
                 .as_bytes())
                 .unwrap_or(());
         }
@@ -229,9 +225,9 @@ fn main() {
     println!("Checking Gps");
     gps_checker();
 
+    println!("Starting gps...");
     let (gps_tx, gps_rx) = mpsc::channel();
     let _gps_thread = thread::spawn(move || {
-        println!("Starting gps...");
         let max_alt = feldspar_gps(gps_file_name.as_str(), gps_rx);
         println!("Maximum altitude: {}", max_alt);
     });
