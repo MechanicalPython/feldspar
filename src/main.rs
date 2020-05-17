@@ -86,7 +86,7 @@ fn gps_checker() {
         _ => {}
     };
 
-    let nmea_output = gps.pmtk_314_api_set_nmea_output(0, 0, 0, 1, 0, 0, 1);
+    let nmea_output = gps.pmtk_314_api_set_nmea_output(0, 0, 0, 1, 1, 0, 1);
     println!("GGA output only: {:?}", nmea_output);
 
     let valid_hz = ["100", "200", "400", "500", "1000"];
