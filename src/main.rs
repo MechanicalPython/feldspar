@@ -34,7 +34,6 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) {
                 let longitude = sentence.long;
                 let altitude = sentence.msl_alt;
                 let sats = sentence.satellites_used;
-                println!("{:?}, {:?}, {:?}", latitude, longitude, altitude);
                 if altitude.unwrap_or(0.0) > max_alt {
                     max_alt = altitude.unwrap()
                 }
@@ -50,7 +49,6 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) {
                 let vdop = sentence.vdop;
                 let hdop = sentence.hdop;
                 let pdop = sentence.pdop;
-                println!("{:?}, {:?}, {:?}", vdop, hdop, pdop);
                 gps_file.write_all(format!("GSA,{},{},{},{}\n",
                                            utc,
                                            vdop.unwrap_or(0.0),
@@ -86,7 +84,7 @@ fn gps_checker() {
     let nmea_output = gps.pmtk_314_api_set_nmea_output(0, 0, 0, 1, 1, 0, 1);
     println!("GGA output only: {:?}", nmea_output);
 
-    let valid_hz = ["100", "200", "400", "500", "1000"];
+    let valid_hz = ["200", "500", "1000"];
     for hz in valid_hz.iter() {
         let result = gps.pmtk_220_set_nmea_updaterate(hz);
         println!("{}Hz: {:?}", (1000_f32 / hz.parse::<f32>().unwrap()), result);
