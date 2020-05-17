@@ -13,7 +13,7 @@ use adafruit_gps::PMTK::send_pmtk::Pmtk001Ack;
 use clap::{App, Arg};
 use rppal::gpio::Gpio;
 
-fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
+fn feldspar_gps(file_name: &str, rx: Receiver<bool>) {
     let port = open_port("/dev/serial0", 9600);
     let mut gps = Gps { port };
 
@@ -60,10 +60,10 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) -> f32 {
         }
 
         if rx.try_recv().unwrap_or(false) {
+            println!("Maximum altitude: {}", max_alt);
             break;
         }
     }
-    return max_alt;
 }
 
 fn gps_checker() {
@@ -213,11 +213,10 @@ fn main() {
     println!("Checking Gps");
     gps_checker();
 
-    println!("Starting gps...");
+    println!("\nStarting gps...");
     let (gps_tx, gps_rx) = mpsc::channel();
     let _gps_thread = thread::spawn(move || {
-        let max_alt = feldspar_gps(gps_file_name.as_str(), gps_rx);
-        println!("Maximum altitude: {}", max_alt);
+        feldspar_gps(gps_file_name.as_str(), gps_rx);
     });
 
     println!("Press enter to begin launch countdown.");
