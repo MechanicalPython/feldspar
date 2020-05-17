@@ -34,11 +34,11 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) {
                 let longitude = sentence.long;
                 let altitude = sentence.msl_alt;
                 let sats = sentence.satellites_used;
-                // println!("{:?}, {:?}, {:?}", latitude, longitude, altitude);
+                println!("{:?}, {:?}, {:?}", latitude, longitude, altitude);
                 if altitude.unwrap_or(0.0) > max_alt {
                     max_alt = altitude.unwrap()
                 }
-                gps_file.write_all(format!("GGA,{},{},{},{}, {}\n",
+                gps_file.write_all(format!("GGA,{},{},{},{},{}\n",
                                            utc,
                                            latitude.unwrap_or(0.0),
                                            longitude.unwrap_or(0.0),
@@ -50,7 +50,7 @@ fn feldspar_gps(file_name: &str, rx: Receiver<bool>) {
                 let vdop = sentence.vdop;
                 let hdop = sentence.hdop;
                 let pdop = sentence.pdop;
-                // println!("{:?}, {:?}, {:?}", vdop, hdop, pdop);
+                println!("{:?}, {:?}, {:?}", vdop, hdop, pdop);
                 gps_file.write_all(format!("GSA,{},{},{},{}\n",
                                            utc,
                                            vdop.unwrap_or(0.0),
