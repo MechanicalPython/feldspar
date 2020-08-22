@@ -1,3 +1,5 @@
+mod imu;
+
 use std::fs::OpenOptions;
 use std::io::{self, stdout, Write};
 use std::path::Path;

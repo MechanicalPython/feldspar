@@ -10,6 +10,10 @@ edition = "2018"
 adafruit_gps = "0.3.5"
 rppal = "0.11.3"
 clap = "2.33.0"
+linux-embedded-hal = "0.2.0"
+mpu9250 = "0.22.2"
+embedded-hal = "0.2.3"
+
 
 [profile.release]
 codegen-units = 1
