@@ -1,6 +1,6 @@
 [package]
 name = "feldspar"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Matt Barson <matt.barson@gmail.com>"]
 edition = "2018"
 
@@ -13,7 +13,7 @@ clap = "2.33.0"
 linux-embedded-hal = "0.2.0"
 mpu9250 = "0.22.2"
 embedded-hal = "0.2.3"
-imu = { name = "imu", path = "../imu/" }
+marg = { path = "../marg" }
 
 [profile.release]
 codegen-units = 1

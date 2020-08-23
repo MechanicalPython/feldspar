@@ -131,13 +131,13 @@ dependencies = [
 
 [[package]]
 name = "feldspar"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "adafruit_gps",
  "clap",
  "embedded-hal",
- "imu",
  "linux-embedded-hal",
+ "marg",
  "mpu9250",
  "rppal",
 ]
@@ -162,10 +162,6 @@ dependencies = [
  "libc",
  "nix 0.14.1",
 ]
-
-[[package]]
-name = "imu"
-version = "0.1.1"
 
 [[package]]
 name = "lazy_static"
@@ -229,6 +225,10 @@ checksum = "86dd2487cdfea56def77b88438a2c915fb45113c5319bfe7e14306ca4cd0b0e1"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "marg"
+version = "0.1.1"
 
 [[package]]
 name = "memchr"
