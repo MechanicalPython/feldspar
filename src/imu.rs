@@ -18,6 +18,8 @@
 
 extern crate linux_embedded_hal as hal;
 extern crate mpu9250;
+extern crate imu;
+
 
 use std::thread::sleep;
 use std::time::Duration;

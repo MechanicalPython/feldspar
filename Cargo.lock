@@ -136,6 +136,7 @@ dependencies = [
  "adafruit_gps",
  "clap",
  "embedded-hal",
+ "imu",
  "linux-embedded-hal",
  "mpu9250",
  "rppal",
@@ -161,6 +162,10 @@ dependencies = [
  "libc",
  "nix 0.14.1",
 ]
+
+[[package]]
+name = "imu"
+version = "0.1.1"
 
 [[package]]
 name = "lazy_static"
