@@ -18,8 +18,6 @@
 
 extern crate linux_embedded_hal as hal;
 extern crate mpu9250;
-extern crate imu;
-
 
 use std::thread::sleep;
 use std::time::Duration;
@@ -35,28 +33,33 @@ pub struct Mpu {
     pub port: Mpu9250<SpiDevice<Spidev, Pin>, Marg>
 }
 
-pub fn open_mpu_port() -> Mpu {
-    let mut spi = Spidev::open("/dev/spidev0.0").unwrap();
-    let options = SpidevOptions::new().max_speed_hz(1_000_000)
-                                      .mode(spidev::SPI_MODE_3)
-                                      .build();
-    spi.configure(&options).unwrap();
+impl Mpu {
+    pub fn open_mpu_port() -> Mpu {
+        let mut spi = Spidev::open("/dev/spidev0.0").unwrap();
+        let options = SpidevOptions::new().max_speed_hz(1_000_000)
+            .mode(spidev::SPI_MODE_3)
+            .build();
+        spi.configure(&options).unwrap();
 
-    let ncs = Pin::new(25);
-    ncs.export().unwrap();
-    sleep(Duration::from_millis(100));  // Seems to fix set_direction permission issue
-    while !ncs.is_exported() {}
+        let ncs = Pin::new(25);
+        ncs.export().unwrap();
+        sleep(Duration::from_millis(100));  // Seems to fix set_direction permission issue
+        while !ncs.is_exported() {}
 
-    ncs.set_direction(Direction::Out).unwrap();  // Permission error here on first run.
-    ncs.set_value(1).unwrap();
+        ncs.set_direction(Direction::Out).unwrap();  // Permission error here on first run.
+        ncs.set_value(1).unwrap();
 
-    let mpu = Mpu9250::marg_default(spi, ncs, &mut Delay).unwrap();
-    return Mpu{
-        port: mpu,
-    };
+        let mpu = Mpu9250::marg_default(spi, ncs, &mut Delay).unwrap();
+        return Mpu {
+            port: mpu,
+        };
+    }
+
+    pub fn close_mpu_port() {
+        let _ = Pin::new(25).unexport().unwrap();
+        sleep(Duration::from_millis(100));
+    }
 }
 
-pub fn close_mpu_port() {
-    let _ = Pin::new(25).unexport().unwrap();
-    sleep(Duration::from_millis(100));
-}
+
+
