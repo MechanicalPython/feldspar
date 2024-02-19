@@ -3,5 +3,5 @@
 .idea
 feldspar_cam/
 gps_data.txt
-/Cargo.lock
+Cargo.lock
 .DS_Store
